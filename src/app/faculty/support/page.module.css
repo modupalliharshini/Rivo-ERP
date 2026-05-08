@@ -1,0 +1,25 @@
+.main { display: flex; flex-direction: column; gap: 1.5rem; }
+.newBtn { display: flex; align-items: center; gap: 0.5rem; background: #3b82f6; color: white; border: none; padding: 0.625rem 1.25rem; border-radius: 8px; font-size: 0.9375rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.2s; }
+.newBtn:hover { background: #2563eb; }
+.formCard { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.07); display: flex; flex-direction: column; gap: 1rem; }
+.formGroup { display: flex; flex-direction: column; gap: 0.4rem; }
+.formGroup label { font-size: 0.8125rem; font-weight: 500; color: #374151; }
+.formInput { padding: 0.625rem 0.875rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.9375rem; font-family: inherit; outline: none; transition: border-color 0.2s; }
+.formInput:focus { border-color: #3b82f6; }
+.formActions { display: flex; justify-content: flex-end; gap: 0.75rem; }
+.cancelBtn { background: #f3f4f6; color: #374151; border: none; padding: 0.625rem 1.25rem; border-radius: 8px; font-size: 0.875rem; font-weight: 600; cursor: pointer; font-family: inherit; }
+.submitBtn { background: #3b82f6; color: white; border: none; padding: 0.625rem 1.25rem; border-radius: 8px; font-size: 0.875rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.2s; }
+.submitBtn:hover { background: #2563eb; }
+.tableCard { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
+.tableTitle { font-size: 1.125rem; font-weight: 700; color: #111827; margin-bottom: 1.25rem; }
+.table { width: 100%; border-collapse: collapse; }
+.table th { text-align: left; padding: 0.75rem 1rem; font-size: 0.875rem; font-weight: 600; color: #374151; border-bottom: 2px solid #f3f4f6; }
+.table td { padding: 1rem; font-size: 0.9375rem; color: #374151; border-bottom: 1px solid #f9fafb; }
+.ticketId { font-weight: 700; color: #6b7280; font-size: 0.875rem; }
+.badge { padding: 0.2rem 0.625rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+.priorityHigh { background: #fee2e2; color: #dc2626; }
+.priorityMedium { background: #fef9c3; color: #ca8a04; }
+.priorityLow { background: #dcfce7; color: #16a34a; }
+.statusResolved { background: #dbeafe; color: #1d4ed8; }
+.statusOpen { background: #dcfce7; color: #16a34a; }
+.statusInProgress { background: #fef9c3; color: #ca8a04; }

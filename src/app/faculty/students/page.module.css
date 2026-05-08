@@ -1,0 +1,19 @@
+.main { display: flex; flex-direction: column; gap: 1.5rem; }
+.tableCard { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
+.tableHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; gap: 1rem; flex-wrap: wrap; }
+.tableTitle { font-size: 1.125rem; font-weight: 700; color: #111827; }
+.controls { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+.sectionSelect { padding: 0.5rem 0.875rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.875rem; color: #374151; background: white; font-family: inherit; outline: none; }
+.searchBox { display: flex; align-items: center; gap: 0.5rem; border: 1px solid #d1d5db; border-radius: 8px; padding: 0.5rem 0.875rem; background: white; }
+.searchIcon { color: #9ca3af; }
+.searchInput { border: none; outline: none; font-size: 0.875rem; color: #374151; font-family: inherit; width: 180px; }
+.table { width: 100%; border-collapse: collapse; }
+.table th { text-align: left; padding: 0.75rem 1rem; font-size: 0.875rem; font-weight: 600; color: #374151; border-bottom: 2px solid #f3f4f6; }
+.table td { padding: 1rem; font-size: 0.9375rem; color: #374151; border-bottom: 1px solid #f9fafb; }
+.studentName { font-weight: 700; color: #111827; }
+.perfBadge { padding: 0.2rem 0.625rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+.perfExcellent { background: #dcfce7; color: #16a34a; }
+.perfGood { background: #cffafe; color: #0e7490; }
+.perfAverage { background: #fef9c3; color: #ca8a04; }
+.viewBtn { background: white; color: #374151; border: 1px solid #d1d5db; padding: 0.375rem 0.875rem; border-radius: 6px; font-size: 0.8125rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+.viewBtn:hover { background: #f9fafb; }

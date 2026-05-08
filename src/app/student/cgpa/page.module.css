@@ -1,0 +1,105 @@
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.headerStat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-right: 1.5rem;
+}
+
+.headerStatLabel {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.headerStatValue {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.tableSection {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.sectionTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 1.5rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  padding-bottom: 1rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #111827;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.table td {
+  padding: 1.25rem 0;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: middle;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.subjectName {
+  font-weight: 600;
+  color: #111827;
+}
+
+.badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badgeExcellent {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.badgeGood {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.backLinkContainer {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.backLink {
+  color: #4b5563;
+  font-weight: 500;
+  text-decoration: none;
+  font-size: 0.9375rem;
+  transition: color 0.2s ease;
+}
+
+.backLink:hover {
+  color: #111827;
+}

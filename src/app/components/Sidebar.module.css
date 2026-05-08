@@ -1,0 +1,127 @@
+.sidebar {
+  width: 250px;
+  background-color: var(--card-bg);
+  border-right: 1px solid var(--border-color);
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+.logoContainer {
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 0.5rem;
+}
+
+.sidebarLogo {
+  max-width: 100%;
+  height: auto;
+  max-height: 70px;
+  object-fit: contain;
+}
+
+.logoText {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-highlight);
+  line-height: 1.1;
+}
+
+.logoText span {
+  color: var(--text-primary);
+}
+
+.navList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  gap: 1rem;
+  transition: all 0.2s ease;
+  border-left: 4px solid transparent;
+}
+
+.navItem:hover {
+  background-color: #f8fafc;
+  color: var(--text-primary);
+}
+
+.active {
+  background-color: #fcebeb;
+  color: var(--text-highlight);
+  border-left-color: var(--text-highlight);
+}
+
+.activeIcon {
+  color: var(--text-highlight) !important;
+}
+
+.navIcon {
+  color: #64748b;
+  width: 20px;
+  height: 20px;
+  stroke-width: 2px;
+}
+
+.viewSwitcher {
+  padding: 0 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 0.5rem;
+}
+
+.viewButton {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: 1.5px solid #c91f28;
+  background: white;
+  color: #c91f28;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.viewButton:hover {
+  background: #fdf2f2;
+}
+
+.viewButtonActive {
+  background: #c91f28 !important;
+  color: white !important;
+}
+
+.viewIcon {
+  width: 16px;
+  height: 16px;
+}

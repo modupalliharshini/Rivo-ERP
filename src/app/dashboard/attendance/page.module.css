@@ -1,0 +1,200 @@
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.statWrapper {
+  animation: fadeUp 0.5s ease-out forwards;
+  opacity: 0;
+}
+.statWrapper:nth-child(1) { animation-delay: 0.1s; }
+.statWrapper:nth-child(2) { animation-delay: 0.2s; }
+.statWrapper:nth-child(3) { animation-delay: 0.3s; }
+.statWrapper:nth-child(4) { animation-delay: 0.4s; }
+
+.tableCard {
+  background-color: var(--card-bg);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  border: 1px solid var(--border-color);
+  animation: fadeUp 0.5s ease-out forwards;
+  animation-delay: 0.5s;
+  opacity: 0;
+}
+
+.tableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.tableTitle {
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.exportBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  color: #1a56db; /* Blue text */
+  background: white;
+  border: 1px solid #1a56db;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.exportBtn:hover {
+  background: #f1f5f9;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table th {
+  padding-bottom: 1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.table td {
+  padding: 1rem 0;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.table td:first-child, .table th:first-child { padding-left: 0.5rem; font-weight: 600; color: var(--text-primary); }
+.table td:last-child { padding-right: 0.5rem; }
+
+.table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover td {
+  background-color: #fafbfc;
+}
+
+.statusIndicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.dotGreen { background-color: var(--color-success-text); }
+.dotYellow { background-color: var(--color-pending-text); }
+.textGreen { color: var(--color-success-text); }
+.textYellow { color: var(--color-pending-text); }
+
+/* Custom Stat Card internals for Attendance */
+.attCard {
+  background-color: var(--card-bg);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.attCardTitle {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.attCardValue {
+  color: var(--text-primary);
+  font-size: 2.25rem;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background-color: #f1f5f9;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 9999px;
+}
+
+.fillRed {
+  background-color: var(--text-highlight);
+  width: 95%; /* Present Today mock is almost full */
+  height: 100%;
+  border-radius: 9999px;
+}
+
+.fillRedTip {
+  background-color: var(--text-highlight);
+  width: 3%; /* Late Entry mock is just a tiny red tip */
+  height: 100%;
+  border-radius: 9999px;
+}
+
+.actionPill {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  background-color: #fcebeb;
+  color: var(--text-highlight);
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  font-weight: 600;
+  width: fit-content;
+}
+
+/* Date Picker container */
+.datePicker {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .table { display: block; overflow-x: auto; white-space: nowrap; }
+}

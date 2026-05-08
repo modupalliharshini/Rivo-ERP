@@ -1,0 +1,127 @@
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.createBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+.createBtn:hover { background: #2563eb; }
+
+.tableCard {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+}
+
+.tableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.tableTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.5rem 0.875rem;
+  background: white;
+}
+
+.searchIcon { color: #9ca3af; }
+
+.searchInput {
+  border: none;
+  outline: none;
+  font-size: 0.875rem;
+  color: #374151;
+  font-family: inherit;
+  width: 200px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.table td {
+  padding: 1rem;
+  font-size: 0.9375rem;
+  color: #374151;
+  border-bottom: 1px solid #f9fafb;
+}
+
+.assignmentName {
+  font-weight: 700;
+  color: #111827;
+}
+
+.courseCell { color: #6b7280; }
+
+.badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badgeActive { background: #dcfce7; color: #16a34a; }
+.badgeClosed { background: #f3f4f6; color: #6b7280; }
+
+.reviewBtn, .gradesBtn {
+  padding: 0.375rem 0.875rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.reviewBtn {
+  background: white;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+.reviewBtn:hover { background: #f9fafb; }
+
+.gradesBtn {
+  background: white;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+.gradesBtn:hover { background: #f9fafb; }

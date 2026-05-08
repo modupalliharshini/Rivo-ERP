@@ -1,0 +1,105 @@
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.formCard {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  max-width: 800px;
+}
+
+.cardTitle {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: #111827;
+  margin-bottom: 1.5rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5rem;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.selectInput, .textArea {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  font-size: 0.875rem;
+  font-family: inherit;
+  color: #111827;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.selectInput:focus, .textArea:focus {
+  border-color: #3b82f6;
+}
+
+.textArea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.starsRow {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.starFilled {
+  color: #fbbf24;
+  fill: #fbbf24;
+}
+
+.starOutline {
+  color: #4b5563;
+}
+
+.submitBtn {
+  background: #3b82f6;
+  color: white;
+  font-weight: 600;
+  font-family: inherit;
+  font-size: 0.875rem;
+  padding: 0.625rem 1.25rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.submitBtn:hover {
+  background: #2563eb;
+}
+
+.backLinkContainer {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.backLink {
+  color: #4b5563;
+  font-weight: 500;
+  text-decoration: none;
+  font-size: 0.9375rem;
+  transition: color 0.2s ease;
+}
+
+.backLink:hover {
+  color: #111827;
+}

@@ -1,0 +1,81 @@
+.container {
+  background-color: var(--card-bg);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  border: 1px solid var(--border-color);
+  margin-top: 2rem;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table th {
+  padding-bottom: 1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.table td {
+  padding: 1rem 0;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover td {
+  background-color: #fafbfc;
+}
+
+.table td:first-child,
+.table th:first-child {
+  padding-left: 0.5rem;
+  color: var(--text-primary);
+}
+
+.table td:last-child {
+  padding-right: 0.5rem;
+}
+
+/* Status Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.badgeApproved {
+  background-color: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.badgePending {
+  background-color: var(--color-pending-bg);
+  color: var(--color-pending-text);
+}
+
+@media (max-width: 768px) {
+  .table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}

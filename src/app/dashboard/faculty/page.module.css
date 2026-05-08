@@ -1,0 +1,96 @@
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.statWrapper:nth-child(1) { animation: fadeUp 0.5s ease-out forwards; animation-delay: 0.1s; opacity: 0; }
+.statWrapper:nth-child(2) { animation: fadeUp 0.5s ease-out forwards; animation-delay: 0.2s; opacity: 0; }
+.statWrapper:nth-child(3) { animation: fadeUp 0.5s ease-out forwards; animation-delay: 0.3s; opacity: 0; }
+
+.tableCard {
+  background-color: var(--card-bg);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  border: 1px solid var(--border-color);
+  animation: fadeUp 0.5s ease-out forwards;
+  animation-delay: 0.4s;
+  opacity: 0;
+}
+
+.tableTitle {
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table th {
+  padding-bottom: 1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.table td {
+  padding: 1rem 0;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.table td:first-child, .table th:first-child { padding-left: 0.5rem; font-weight: 600; color: var(--text-primary); }
+.table td:last-child { padding-right: 0.5rem; text-align: center; }
+
+.table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover td {
+  background-color: #fafbfc;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.badgePresent { background-color: var(--color-success-bg); color: var(--color-success-text); }
+.badgeSession { background-color: #e0f2fe; color: #0284c7; } /* Blue pill */
+.badgeLeave { background-color: var(--color-pending-bg); color: var(--color-pending-text); } /* Yellow pill */
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.star {
+  color: #fbd38d; /* golden yellow */
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .table { display: block; overflow-x: auto; white-space: nowrap; }
+}

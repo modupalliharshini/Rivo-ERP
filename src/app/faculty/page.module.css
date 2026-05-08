@@ -1,0 +1,140 @@
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+.dashboardContent {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.viewBtn {
+  background: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.viewBtn:hover {
+  background: #f9fafb;
+}
+
+.submissionsSection {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.submissionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.submissionItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.submissionInfo {
+  flex: 1;
+}
+
+.studentName {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.assignmentName {
+  font-size: 0.8125rem;
+  color: #6b7280;
+}
+
+.submissionStatus {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.statusBadge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.new { background: #eff6ff; color: #2563eb; }
+.yesterday { background: #fef3c7; color: #d97706; }
+.daysago { background: #f3f4f6; color: #6b7280; }
+
+.timeText {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.viewAllBtn {
+  width: 100%;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #4b5563;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.viewAllBtn:hover {
+  background: #f3f4f6;
+}
+
+@media (max-width: 1024px) {
+  .dashboardContent {
+    grid-template-columns: 1fr;
+  }
+}

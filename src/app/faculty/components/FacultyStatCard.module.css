@@ -1,0 +1,52 @@
+.card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.title {
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.icon {
+  color: #fbbf24;
+}
+
+.value {
+  color: #111827;
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.subtext {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.subtextSuccess {
+  color: #059669;
+}
+
+.subtextWarning {
+  color: #d97706;
+}
+
+.subtextInfo {
+  color: #2563eb;
+}
+
+.subtextText {
+  color: #6b7280;
+}

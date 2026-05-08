@@ -1,0 +1,128 @@
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.courseCardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.courseCard {
+  background-color: var(--card-bg);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  animation: fadeUp 0.5s ease-out forwards;
+  opacity: 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.courseCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.courseCard:nth-child(1) { animation-delay: 0.1s; }
+.courseCard:nth-child(2) { animation-delay: 0.2s; }
+.courseCard:nth-child(3) { animation-delay: 0.3s; }
+
+.iconContainer {
+  margin-bottom: 1rem;
+  display: flex;
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem;
+  border-radius: var(--radius-md);
+}
+
+.iconWrapperBlue { background-color: #eff6ff; color: #3b82f6; } /* Tail blue-50 and blue-500 */
+.iconWrapperGreen { background-color: #ecfdf5; color: #10b981; } /* Tail emerald-50 and 500 */
+.iconWrapperRed { background-color: #fef2f2; color: #ef4444; } /* Tail red-50 and 500 */
+
+.courseTitle {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.courseSub {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
+.pillGray {
+  display: inline-flex;
+  padding: 0.25rem 0.75rem;
+  background-color: #f1f5f9;
+  color: #64748b;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.manageLink {
+  color: #3b82f6;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  transition: opacity 0.2s ease;
+}
+
+.manageLink:hover {
+  opacity: 0.8;
+}
+
+/* Graph Section */
+.graphSection {
+  animation: fadeUp 0.5s ease-out forwards;
+  animation-delay: 0.4s;
+  opacity: 0;
+}
+
+.sectionTitle {
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+}
+
+.graphPlaceholder {
+  width: 100%;
+  height: 350px;
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-lg);
+  background-color: #fafbfc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 500;
+  gap: 0.5rem;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}

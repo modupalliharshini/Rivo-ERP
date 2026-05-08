@@ -1,0 +1,183 @@
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.filterCard {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: flex-end;
+  gap: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  flex-wrap: wrap;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+  min-width: 180px;
+}
+
+.filterLabel {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.filterSelect, .filterInput {
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  color: #111827;
+  background: white;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.filterSelect:focus, .filterInput:focus {
+  border-color: #3b82f6;
+}
+
+.loadBtn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.625rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family: inherit;
+  white-space: nowrap;
+  align-self: flex-end;
+}
+
+.loadBtn:hover { background: #2563eb; }
+
+.tableCard {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+}
+
+.tableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.tableTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.bulkActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.presentAllBtn, .absentAllBtn {
+  padding: 0.375rem 0.875rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.presentAllBtn {
+  background: white;
+  color: #111827;
+  border: 1px solid #d1d5db;
+}
+.presentAllBtn:hover { background: #f9fafb; }
+
+.absentAllBtn {
+  background: white;
+  color: #dc2626;
+  border: 1px solid #dc2626;
+}
+.absentAllBtn:hover { background: #fef2f2; }
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.table td {
+  padding: 1rem;
+  font-size: 0.9375rem;
+  color: #374151;
+  border-bottom: 1px solid #f9fafb;
+}
+
+.studentName {
+  font-weight: 600;
+  color: #111827;
+}
+
+.statusGroup {
+  display: flex;
+  gap: 0.375rem;
+}
+
+.statusBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: none;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.statusP { background: #059669; color: white; }
+.statusA { background: #dc2626; color: white; }
+.statusL { background: #d97706; color: white; }
+.statusInactive { background: #f3f4f6; color: #9ca3af; }
+.statusInactive:hover { background: #e5e7eb; }
+
+.submitRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.submitBtn {
+  background: #059669;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+
+.submitBtn:hover { background: #047857; }

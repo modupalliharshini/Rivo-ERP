@@ -1,0 +1,37 @@
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.coursesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.scheduleSection {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.scheduleWrapper {
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .coursesGrid {
+    grid-template-columns: 1fr;
+  }
+}
