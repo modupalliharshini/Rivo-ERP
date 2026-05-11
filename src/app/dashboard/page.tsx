@@ -1,12 +1,58 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import StatCard from './components/StatCard';
 import RecentAdmissions from './components/RecentAdmissions';
 import PageHeader from '../components/PageHeader';
+import { createClient } from '@/utils/supabase/client';
 
 export default function AdminDashboardPage() {
+  const [stats, setStats] = useState({
+    totalStudents: 0,
+    totalFaculty: 0,
+    isLoading: true
+  });
+
+  const supabase = createClient();
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('institution_id')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile?.institution_id) return;
+
+      // Count Students
+      const { count: studentCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('role', 'student')
+        .eq('institution_id', profile.institution_id);
+
+      // Count Faculty
+      const { count: facultyCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('role', 'faculty')
+        .eq('institution_id', profile.institution_id);
+
+      setStats({
+        totalStudents: studentCount || 0,
+        totalFaculty: facultyCount || 0,
+        isLoading: false
+      });
+    };
+
+    fetchStats();
+  }, []);
+
   return (
     <main>
       <PageHeader 
@@ -28,8 +74,8 @@ export default function AdminDashboardPage() {
         <div className={styles.statWrapper}>
           <StatCard
             title="Total Students"
-            value="1,248"
-            trend="↑ 12% increase"
+            value={stats.isLoading ? '...' : stats.totalStudents.toLocaleString()}
+            trend={stats.totalStudents > 0 ? "Real-time sync" : "No records"}
             trendType="positive"
           />
         </div>
@@ -37,7 +83,7 @@ export default function AdminDashboardPage() {
           <StatCard
             title="Fee Collection"
             value="₹42,500"
-            trend="85% Target reached"
+            trend="Static Placeholder"
             trendType="info"
           />
         </div>
@@ -45,14 +91,14 @@ export default function AdminDashboardPage() {
           <StatCard
             title="Average Attendance"
             value="94.2%"
-            trend="Today's report"
+            trend="Static Placeholder"
             trendType="warning"
           />
         </div>
         <div className={styles.statWrapper}>
           <StatCard
             title="Active Faculty"
-            value="76"
+            value={stats.isLoading ? '...' : stats.totalFaculty.toLocaleString()}
             trend="Full Strength"
             trendType="neutral"
           />
