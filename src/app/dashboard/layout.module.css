@@ -42,6 +42,24 @@
 @media (max-width: 1024px) {
   .mainContent {
     margin-left: 0;
-    padding: 1.5rem 1rem;
+    padding: 4.5rem 1.5rem 2rem;
+    height: auto;
+    overflow-y: visible;
+  }
+  
+  .dashboardWrapper {
+    flex-direction: column;
+    height: auto;
+    overflow-y: visible;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 0.5rem;
+  }
+  
+  .footer {
+    padding: 1rem 0;
   }
 }

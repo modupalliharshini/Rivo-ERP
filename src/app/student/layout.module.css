@@ -28,3 +28,16 @@
   font-size: 0.8125rem;
   border-top: 1px solid #f3f4f6;
 }
+
+@media (max-width: 1024px) {
+  .mainContent {
+    padding: 4.5rem 1.5rem 2rem;
+    height: auto;
+    overflow-y: visible;
+  }
+  .layoutWrapper {
+    flex-direction: column;
+    height: auto;
+    overflow-y: visible;
+  }
+}

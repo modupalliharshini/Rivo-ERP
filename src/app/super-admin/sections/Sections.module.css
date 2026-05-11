@@ -618,7 +618,19 @@
 }
 
 @media (max-width: 1024px) {
-  .settingsGrid {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .statsGrid {
     grid-template-columns: 1fr;
+  }
+  .cardHeader {
+    padding: 1rem 1.5rem;
+  }
+  .statValue {
+    font-size: 1.5rem;
   }
 }

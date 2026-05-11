@@ -200,12 +200,48 @@
 @media (max-width: 768px) {
   .header {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 1.5rem;
+    align-items: stretch;
+    gap: 1rem;
+    padding-bottom: 1rem;
   }
   
+  .title {
+    font-size: 1.75rem;
+  }
+
   .actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .actionNode {
+    width: 100%;
+  }
+
+  .actionNode > div {
+    flex-direction: column;
+    gap: 0.75rem !important;
+  }
+
+  .actionNode button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .profileContainer {
     width: 100%;
     justify-content: flex-end;
+  }
+
+  .profileTrigger {
+    width: 100%;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+  }
+
+  .userProfile {
+    align-items: flex-start;
   }
 }
