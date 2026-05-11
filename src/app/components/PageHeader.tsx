@@ -25,26 +25,30 @@ export default function PageHeader({
   const pathname = usePathname();
 
   useEffect(() => {
-    const loadProfile = () => {
-      const savedEmail = localStorage.getItem('userEmail');
-      const savedFacultyId = localStorage.getItem('facultyId');
-      const savedStudentId = localStorage.getItem('studentId');
-      
-      if (savedEmail) {
-        const namePart = savedEmail.split('@')[0];
-        const formattedName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
-        const derivedInitials = namePart.slice(0, 2).toUpperCase();
-        
-        setUserName(formattedName);
-        setInitials(derivedInitials);
-      } else if (savedStudentId) {
-        const profileName = localStorage.getItem('studentProfileName') || 'Alex Johnson';
-        const computedInitials = profileName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'AJ';
-        setUserName(savedStudentId.toUpperCase());
-        setInitials(computedInitials);
-      } else if (savedFacultyId) {
-        setUserName(savedFacultyId.toUpperCase());
-        setInitials(savedFacultyId.slice(0, 2).toUpperCase());
+    const loadProfile = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, email')
+        .eq('id', user.id)
+        .single();
+
+      if (profile) {
+        // If we have a real name, use it. Otherwise fall back to the user ID from email.
+        if (profile.first_name) {
+          const fullName = `${profile.first_name} ${profile.last_name || ''}`.trim();
+          const computedInitials = `${profile.first_name[0]}${profile.last_name?.[0] || ''}`.toUpperCase();
+          setUserName(fullName);
+          setInitials(computedInitials);
+        } else {
+          // Fallback: strip @rivo.local to show user ID
+          const displayId = profile.email.replace('@rivo.local', '');
+          setUserName(displayId.toUpperCase());
+          setInitials(displayId.slice(0, 2).toUpperCase());
+        }
       }
     };
 

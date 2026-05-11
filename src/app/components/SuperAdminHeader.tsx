@@ -19,15 +19,30 @@ interface SuperAdminHeaderProps {
 
 export default function SuperAdminHeader({ title, highlight, actionElement }: SuperAdminHeaderProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [adminId, setAdminId] = useState('SA Admin');
+  const [displayName, setDisplayName] = useState('SA Admin');
+  const [initials, setInitials] = useState('SA');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   useEffect(() => {
-    const savedId = localStorage.getItem('superAdminId');
-    if (savedId) {
-      setAdminId(savedId.toUpperCase());
-    }
+    const loadProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name')
+        .eq('id', user.id)
+        .single();
+
+      if (profile?.first_name) {
+        const fullName = `${profile.first_name} ${profile.last_name || ''}`.trim();
+        const computedInitials = `${profile.first_name[0]}${profile.last_name?.[0] || ''}`.toUpperCase();
+        setDisplayName(fullName);
+        setInitials(computedInitials);
+      }
+    };
+    loadProfile();
 
     // Close dropdown when clicking outside
     function handleClickOutside(event: MouseEvent) {
@@ -63,10 +78,10 @@ export default function SuperAdminHeader({ title, highlight, actionElement }: Su
         >
           <div className={styles.profileText}>
             <span className={styles.greeting}>Welcome back,</span>
-            <span className={styles.userName}>{adminId}</span>
+            <span className={styles.userName}>{displayName}</span>
           </div>
           <div className={styles.avatarWrapper}>
-            <div className={styles.avatar}>SA</div>
+            <div className={styles.avatar}>{initials}</div>
             <ChevronDown className={`${styles.chevron} ${isDropdownOpen ? styles.chevronOpen : ''}`} size={16} />
           </div>
         </button>
