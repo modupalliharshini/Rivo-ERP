@@ -36,17 +36,35 @@ export default function SupportPage() {
   const handleCreateTicket = async () => {
     if (!newSubject.trim()) return;
 
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    // Fetch user's institution_id
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('institution_id')
+      .eq('id', user.id)
+      .single();
+
     const { data, error } = await supabase
       .from('tickets')
       .insert([
         { 
           subject: newSubject, 
           priority: newPriority,
-          status: 'Open'
+          status: 'Open',
+          user_id: user.id,
+          institution_id: profile?.institution_id
         }
       ])
       .select()
       .single();
+
+    if (error) {
+      console.error('Error submitting ticket:', error);
+      alert('Failed to submit ticket: ' + error.message);
+      return;
+    }
 
     if (data) {
       setTickets([data, ...tickets]);

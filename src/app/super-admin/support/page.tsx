@@ -6,7 +6,8 @@ import {
   CheckCircle, 
   Clock,
   AlertTriangle,
-  ExternalLink
+  ExternalLink,
+  ChevronDown
 } from 'lucide-react';
 import styles from '../page.module.css';
 import sectionStyles from '../sections/Sections.module.css';
@@ -22,29 +23,44 @@ export default function GlobalTicketsPage() {
     pending: 0
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const supabase = createClient();
 
-  useEffect(() => {
-    const loadData = async () => {
-      const { data } = await supabase
-        .from('tickets')
-        .select('*')
-        .order('created_at', { ascending: false });
+  const loadData = async () => {
+    const { data } = await supabase
+      .from('tickets')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-      if (data) {
-        setTickets(data);
-        const open = data.filter(t => t.status !== 'Resolved').length;
-        const urgent = data.filter(t => t.priority === 'Urgent' || t.priority === 'High').length;
-        const resolved = data.filter(t => t.status === 'Resolved').length;
-        const pending = data.filter(t => t.status === 'In Progress').length;
-        
-        setStats({ open, urgent, resolved, pending });
-      }
-      setIsLoading(false);
-    };
+    if (data) {
+      setTickets(data);
+      const openCount = data.filter(t => t.status !== 'Resolved').length;
+      const urgentCount = data.filter(t => t.priority === 'Urgent' || t.priority === 'High').length;
+      const resolvedCount = data.filter(t => t.status === 'Resolved').length;
+      const pendingCount = data.filter(t => t.status === 'In Progress').length;
+      
+      setStats({ open: openCount, urgent: urgentCount, resolved: resolvedCount, pending: pendingCount });
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
     loadData();
   }, []);
+
+  const handleStatusUpdate = async (id: string, newStatus: string) => {
+    setUpdatingId(id);
+    const { error } = await supabase
+      .from('tickets')
+      .update({ status: newStatus })
+      .eq('id', id);
+
+    if (!error) {
+      await loadData();
+    }
+    setUpdatingId(null);
+  };
 
   const STATS_CARDS = [
     { 
@@ -116,8 +132,8 @@ export default function GlobalTicketsPage() {
                   <th>Subject</th>
                   <th>Priority</th>
                   <th>Status</th>
+                  <th>Update Action</th>
                   <th>Raised At</th>
-                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -142,13 +158,23 @@ export default function GlobalTicketsPage() {
                           {ticket.status}
                         </span>
                       </td>
-                      <td style={{color: '#64748b', fontSize: '0.85rem'}}>
-                        {new Date(ticket.created_at).toLocaleString()}
-                      </td>
                       <td>
-                        <button className={sectionStyles.btnLink} style={{color: '#3b82f6', fontWeight: '600', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem'}}>
-                          Manage <ExternalLink size={14} />
-                        </button>
+                        <div style={{display: 'flex', gap: '0.5rem', alignItems: 'center'}}>
+                          <select 
+                            className={sectionStyles.btnSecondary}
+                            style={{padding: '4px 8px', fontSize: '0.85rem', cursor: 'pointer', border: '1px solid #e2e8f0'}}
+                            value={ticket.status}
+                            disabled={updatingId === ticket.id}
+                            onChange={(e) => handleStatusUpdate(ticket.id, e.target.value)}
+                          >
+                            <option value="Open">Set Open</option>
+                            <option value="In Progress">Set In Progress</option>
+                            <option value="Resolved">Set Resolved</option>
+                          </select>
+                        </div>
+                      </td>
+                      <td style={{color: '#64748b', fontSize: '0.85rem'}}>
+                        {new Date(ticket.created_at).toLocaleDateString()}
                       </td>
                     </tr>
                   ))

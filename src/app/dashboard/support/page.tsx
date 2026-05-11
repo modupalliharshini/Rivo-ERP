@@ -1,14 +1,48 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import PageHeader from '../../components/PageHeader';
 import styles from './page.module.css';
-import { ChevronRight } from 'lucide-react';
-
-const MOCK_TICKETS = [
-  { id: '#T-204', subject: 'Cannot access fees portal', user: 'Alex Johnson', role: 'Student', status: 'Urgent' },
-  { id: '#T-198', subject: 'Attendance Sync Issue', user: 'Emma Watson', role: 'Faculty', status: 'In Progress' },
-];
+import { ChevronRight, Clock, Users, Headphones } from 'lucide-react';
+import { createClient } from '@/utils/supabase/client';
 
 export default function SupportPage() {
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  const supabase = createClient();
+
+  const loadTickets = async () => {
+    const { data } = await supabase
+      .from('tickets')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (data) setTickets(data);
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    loadTickets();
+  }, []);
+
+  const handleStatusUpdate = async (id: string, newStatus: string) => {
+    setUpdatingId(id);
+    const { error } = await supabase
+      .from('tickets')
+      .update({ status: newStatus })
+      .eq('id', id);
+
+    if (!error) {
+      await loadTickets();
+    }
+    setUpdatingId(null);
+  };
+
+  const openCount = tickets.filter(t => t.status !== 'Resolved').length;
+  const urgentCount = tickets.filter(t => t.priority === 'Urgent' || t.priority === 'High').length;
+
   return (
     <div className={styles.container}>
       <PageHeader
@@ -18,57 +52,89 @@ export default function SupportPage() {
 
       <section className={styles.statsGrid}>
         <div className={styles.statCard}>
-          <h3 className={styles.statTitle}>Open Student Tickets</h3>
-          <div className={styles.statValue}>18</div>
-          <a href="#" className={`${styles.statSubLink} ${styles.urgentText}`}>
-            4 Urgent <ChevronRight size={16} />
-          </a>
+          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
+            <h3 className={styles.statTitle}>Total Open Tickets</h3>
+            <Clock size={20} color="#3b82f6" />
+          </div>
+          <div className={styles.statValue}>{openCount}</div>
+          <div className={`${styles.statSubLink} ${styles.urgentText}`}>
+            {urgentCount} High Priority Requests
+          </div>
         </div>
         <div className={styles.statCard}>
-          <h3 className={styles.statTitle}>Open Faculty Tickets</h3>
-          <div className={styles.statValue}>5</div>
-          <a href="#" className={styles.statSubLink}>
-            View All <ChevronRight size={16} />
-          </a>
+          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
+            <h3 className={styles.statTitle}>Global Resolution</h3>
+            <Headphones size={20} color="#22c55e" />
+          </div>
+          <div className={styles.statValue}>{tickets.filter(t => t.status === 'Resolved').length}</div>
+          <div className={styles.statSubLink}>
+            Resolved Lifetime
+          </div>
         </div>
       </section>
 
       <section className={`${styles.tableCard} card-shadow`}>
         <h2 className={styles.tableTitle}>Recent Support Requests</h2>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Ticket ID</th>
-              <th>Subject</th>
-              <th>User</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {MOCK_TICKETS.map((ticket) => (
-              <tr key={ticket.id}>
-                <td>{ticket.id}</td>
-                <td style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{ticket.subject}</td>
-                <td>{ticket.user}</td>
-                <td>{ticket.role}</td>
-                <td>
-                  <span
-                    className={`${styles.badge} ${
-                      ticket.status === 'Urgent' ? styles.badgeUrgent : styles.badgeInProgress
-                    }`}
-                  >
-                    {ticket.status}
-                  </span>
-                </td>
-                <td>
-                  <a href="#" className={styles.reviewLink}>Review</a>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {isLoading ? (
+          <div style={{padding: '3rem', textAlign: 'center', color: '#64748b'}}>Loading support requests...</div>
+        ) : (
+          <div className={styles.tableResponsive}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Ticket ID</th>
+                  <th>Subject</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th>Resolution Action</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tickets.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} style={{textAlign: 'center', padding: '3rem', color: '#64748b'}}>
+                      No tickets found in the system.
+                    </td>
+                  </tr>
+                ) : (
+                  tickets.map((ticket) => (
+                    <tr key={ticket.id}>
+                      <td style={{fontSize: '0.8rem'}}>#{ticket.id.split('-')[0].toUpperCase()}</td>
+                      <td style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{ticket.subject}</td>
+                      <td>
+                        <span className={`${styles.badge} ${ticket.priority === 'High' || ticket.priority === 'Urgent' ? styles.badgeUrgent : styles.badgeInProgress}`}>
+                          {ticket.priority}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`${styles.badge} ${ticket.status === 'Resolved' ? styles.badgeResolved : styles.badgeInProgress}`}>
+                          {ticket.status}
+                        </span>
+                      </td>
+                      <td>
+                        <select 
+                          className={styles.statusSelect}
+                          style={{padding: '4px 8px', borderRadius: '6px', border: '1px solid #e2e8f0', cursor: 'pointer', outline: 'none'}}
+                          value={ticket.status}
+                          disabled={updatingId === ticket.id}
+                          onChange={(e) => handleStatusUpdate(ticket.id, e.target.value)}
+                        >
+                          <option value="Open">Set Open</option>
+                          <option value="In Progress">Set In Progress</option>
+                          <option value="Resolved">Set Resolved</option>
+                        </select>
+                      </td>
+                      <td style={{fontSize: '0.85rem', color: '#64748b'}}>
+                        {new Date(ticket.created_at).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
     </div>
   );

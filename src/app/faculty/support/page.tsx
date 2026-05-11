@@ -44,15 +44,33 @@ export default function SupportPage() {
     e.preventDefault();
     if (!newTicket.subject.trim()) return;
 
-    const { data } = await supabase
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    // Fetch user's institution_id
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('institution_id')
+      .eq('id', user.id)
+      .single();
+
+    const { data, error } = await supabase
       .from('tickets')
       .insert([{
         subject: newTicket.subject,
         priority: newTicket.priority,
-        status: 'Open'
+        status: 'Open',
+        user_id: user.id,
+        institution_id: profile?.institution_id
       }])
       .select()
       .single();
+
+    if (error) {
+      console.error('Error submitting faculty ticket:', error);
+      alert('Failed to submit ticket: ' + error.message);
+      return;
+    }
 
     if (data) {
       setTickets(prev => [data, ...prev]);
