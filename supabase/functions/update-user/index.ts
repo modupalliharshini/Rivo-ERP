@@ -18,7 +18,6 @@ serve(async (req) => {
       { auth: { autoRefreshToken: false, persistSession: false } }
     );
 
-    // Verify the caller is a super_admin
     const authHeader = req.headers.get("Authorization")!;
     const token = authHeader.replace("Bearer ", "");
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
@@ -32,11 +31,11 @@ serve(async (req) => {
 
     const { data: callerProfile } = await supabaseClient
       .from("profiles")
-      .select("role")
+      .select("role, institution_id")
       .eq("id", user.id)
       .single();
 
-    if (!callerProfile || callerProfile.role !== "super_admin") {
+    if (!callerProfile || (callerProfile.role !== "super_admin" && callerProfile.role !== "admin")) {
       return new Response(JSON.stringify({ error: "Forbidden" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 403,
@@ -50,24 +49,37 @@ serve(async (req) => {
     } = reqData;
 
     if (!targetUserId) {
-      return new Response(JSON.stringify({ error: "targetUserId is required" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 400,
-      });
+      throw new Error("targetUserId is required");
     }
 
-    // Prevent editing the super_admin account itself
+    // Fetch target user profile
     const { data: targetProfile } = await supabaseClient
       .from("profiles")
-      .select("role")
+      .select("role, institution_id")
       .eq("id", targetUserId)
       .single();
 
-    if (targetProfile?.role === "super_admin") {
-      return new Response(JSON.stringify({ error: "Cannot edit the Super Admin account" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 403,
-      });
+    if (!targetProfile) {
+      throw new Error("Target user not found");
+    }
+
+    // Protection: Cannot edit Super Admin
+    if (targetProfile.role === "super_admin") {
+      throw new Error("Cannot edit a Super Admin account");
+    }
+
+    // Protection: Admins can only edit users in their institution
+    if (callerProfile.role === "admin") {
+      if (targetProfile.institution_id !== callerProfile.institution_id) {
+        throw new Error("Forbidden: You can only edit users within your own institution");
+      }
+      // Admins cannot change someone's institution or make someone a Super Admin
+      if (institutionId && institutionId !== callerProfile.institution_id) {
+        throw new Error("Forbidden: Admins cannot move users to other institutions");
+      }
+      if (role === 'super_admin') {
+        throw new Error("Forbidden: Admins cannot create Super Admins");
+      }
     }
 
     // Update profile table
