@@ -35,7 +35,7 @@ const STUDENT_MENU_ITEMS = [
   { name: 'Library', path: '/student/library', icon: Book },
   { name: 'Hostel & Mess', path: '/student/hostel', icon: Building },
   { name: 'Feedback Survey', path: '/student/feedback', icon: MessageSquare },
-  { name: 'Ticketing Support', path: '/student/support', icon: Headphones },
+  { name: 'Raise Ticket', path: '/student/support', icon: Headphones },
 ];
 
 export default function StudentSidebar() {

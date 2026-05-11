@@ -21,7 +21,7 @@ const MENU_ITEMS = [
   { name: 'Dashboard', path: '/super-admin', icon: LayoutDashboard },
   { name: 'Institutions', path: '/super-admin/institutions', icon: Building2 },
   { name: 'Global Users', path: '/super-admin/users', icon: Users2 },
-  { name: 'Ticketing Support', path: '/super-admin/support', icon: Headphones },
+  { name: 'Global Tickets', path: '/super-admin/support', icon: Headphones },
   { name: 'Audit Logs', path: '/super-admin/audit', icon: ScrollText },
   { name: 'Global Reports', path: '/super-admin/reports', icon: BarChart3 },
   { name: 'System Settings', path: '/super-admin/settings', icon: Settings },

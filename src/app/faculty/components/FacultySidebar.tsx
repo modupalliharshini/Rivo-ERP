@@ -29,7 +29,7 @@ const FACULTY_MENU_ITEMS = [
   { name: 'My Students', path: '/faculty/students', icon: Users },
   { name: 'Counselling Diary', path: '/faculty/counselling', icon: Notebook },
   { name: 'Time Tables', path: '/faculty/timetable', icon: CalendarDays },
-  { name: 'Ticketing Support', path: '/faculty/support', icon: Headphones },
+  { name: 'Raise Ticket', path: '/faculty/support', icon: Headphones },
 ];
 
 export default function FacultySidebar() {

@@ -35,7 +35,7 @@ const MENU_ITEMS = [
   { name: 'Hostel', path: '/dashboard/hostel', icon: Building },
   { name: 'Transport', path: '/dashboard/transport', icon: Bus },
   { name: 'Reports', path: '/dashboard/reports', icon: TrendingUp },
-  { name: 'Ticketing Support', path: '/dashboard/support', icon: Headphones },
+  { name: 'Raise Ticket', path: '/dashboard/support', icon: Headphones },
   { name: 'Settings', path: '/dashboard/settings', icon: Settings },
 ];
 
