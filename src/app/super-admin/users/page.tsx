@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { MoreVertical, ChevronDown, Plus, Pencil } from 'lucide-react';
+import { MoreVertical, ChevronDown, Plus, Pencil, X } from 'lucide-react';
 import styles from '../page.module.css';
 import sectionStyles from '../sections/Sections.module.css';
 import SuperAdminHeader from '../../components/SuperAdminHeader';

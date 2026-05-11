@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import styles from './page.module.css';
 import StatCard from './components/StatCard';
@@ -7,7 +9,20 @@ import PageHeader from '../components/PageHeader';
 export default function AdminDashboardPage() {
   return (
     <main>
-      <PageHeader titleStart="Admin" titleHighlight="Overview" />
+      <PageHeader 
+        titleStart="Admin" 
+        titleHighlight="Overview" 
+        actionElement={
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <button className="btn-primary" onClick={() => window.location.href='/dashboard/students'}>
+              + Add Student
+            </button>
+            <button className="btn-primary" style={{ background: '#6366f1' }} onClick={() => window.location.href='/dashboard/faculty'}>
+              + Hire Faculty
+            </button>
+          </div>
+        }
+      />
 
       <section className={styles.statsGrid}>
         <div className={styles.statWrapper}>
