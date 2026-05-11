@@ -20,8 +20,13 @@ export default function LoginForm() {
     setError('');
 
     try {
+      let identifierPayload = identifier.trim();
+      if (!identifierPayload.includes('@')) {
+        identifierPayload = `${identifierPayload}@rivo.local`;
+      }
+
       let { error: signInError } = await supabase.auth.signInWithPassword({
-        email: identifier.trim(),
+        email: identifierPayload,
         password: password,
       });
 
@@ -78,11 +83,11 @@ export default function LoginForm() {
     <form className={styles.form} onSubmit={handleSubmit}>
       {error && <div className={styles.errorMessage}>{error}</div>}
       <div className={styles.inputGroup}>
-        <label htmlFor="identifier">Email</label>
+        <label htmlFor="identifier">Email or User ID</label>
         <input
           id="identifier"
-          type="email"
-          placeholder="user@example.com"
+          type="text"
+          placeholder="e.g. ad123, st456, fa789 or Email"
           value={identifier}
           onChange={(e) => {
             setIdentifier(e.target.value);

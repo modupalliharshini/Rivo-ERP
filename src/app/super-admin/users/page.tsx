@@ -133,7 +133,7 @@ export default function GlobalUsers() {
             <thead>
               <tr>
                 <th>User</th>
-                <th>Email</th>
+                <th>User ID / Email</th>
                 <th>Role</th>
                 <th>Joined</th>
                 <th>Status</th>
@@ -155,7 +155,7 @@ export default function GlobalUsers() {
                       <span style={{fontWeight: '500'}}>{user.first_name} {user.last_name}</span>
                     </div>
                   </td>
-                  <td>{user.email}</td>
+                  <td>{user.email.endsWith('@rivo.local') ? user.email.replace('@rivo.local', '') : user.email}</td>
                   <td>{getDisplayRole(user.role)}</td>
                   <td>{formatDate(user.created_at)}</td>
                   <td>

@@ -15,7 +15,7 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    email: '',
+    userId: '',
     password: '',
     role: 'admin'
   });
@@ -37,9 +37,30 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
     setIsLoading(true);
     setError('');
 
+    // Require specific prefixes
+    const idLower = formData.userId.toLowerCase();
+    if (formData.role === 'admin' && !idLower.startsWith('ad')) {
+      setError('Admin ID must start with "ad"');
+      setIsLoading(false);
+      return;
+    }
+    if (formData.role === 'faculty' && !idLower.startsWith('fa')) {
+      setError('Faculty ID must start with "fa"');
+      setIsLoading(false);
+      return;
+    }
+    if (formData.role === 'student' && !idLower.startsWith('st')) {
+      setError('Student ID must start with "st"');
+      setIsLoading(false);
+      return;
+    }
+
     try {
+      const emailPayload = formData.userId.includes('@') ? formData.userId : `${formData.userId}@rivo.local`;
+      const payload = { ...formData, email: emailPayload };
+
       const { data, error: invokeError } = await supabase.functions.invoke('create-user', {
-        body: formData
+        body: payload
       });
 
       if (invokeError) {
@@ -54,7 +75,7 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
       setFormData({
         firstName: '',
         lastName: '',
-        email: '',
+        userId: '',
         password: '',
         role: 'admin'
       });
@@ -105,13 +126,15 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
               </div>
 
               <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-                <label>Email Address</label>
+                <label>User ID</label>
                 <input 
-                  type="email" 
-                  name="email"
+                  type="text" 
+                  name="userId"
                   className={styles.formInput} 
-                  value={formData.email}
+                  value={formData.userId}
                   onChange={handleChange}
+                  placeholder="e.g. ad123, fa456, st789"
+                  autoComplete="off"
                   required 
                 />
               </div>
@@ -124,6 +147,7 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
                   className={styles.formInput} 
                   value={formData.password}
                   onChange={handleChange}
+                  autoComplete="new-password"
                   required 
                   minLength={6}
                 />
