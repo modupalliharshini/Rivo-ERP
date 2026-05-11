@@ -9,6 +9,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import styles from '../super-admin/page.module.css';
+import { createClient } from '@/utils/supabase/client';
 
 interface SuperAdminHeaderProps {
   title: string;
@@ -38,8 +39,11 @@ export default function SuperAdminHeader({ title, highlight, actionElement }: Su
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
+  const supabase = createClient();
+
+  const handleLogout = async () => {
     localStorage.removeItem('superAdminId');
+    await supabase.auth.signOut();
     router.push('/');
   };
 

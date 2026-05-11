@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { LogOut, User, Settings, ChevronDown } from 'lucide-react';
 import styles from './PageHeader.module.css';
+import { createClient } from '@/utils/supabase/client';
 
 interface PageHeaderProps {
   titleStart: string;
@@ -63,10 +64,13 @@ export default function PageHeader({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
+  const supabase = createClient();
+
+  const handleLogout = async () => {
     localStorage.removeItem('userEmail');
     localStorage.removeItem('facultyId');
     localStorage.removeItem('studentId');
+    await supabase.auth.signOut();
     router.push('/');
   };
 
