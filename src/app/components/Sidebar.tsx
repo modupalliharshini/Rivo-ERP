@@ -51,9 +51,22 @@ export default function Sidebar() {
   return (
     <>
       {/* Hamburger Menu for Mobile */}
-      <button className={styles.mobileToggle} onClick={() => setIsOpen(!isOpen)}>
-        {isOpen ? <X size={24} /> : <Menu size={24} />}
-      </button>
+      <div className={styles.mobileNav}>
+        <button className={styles.mobileToggle} onClick={() => setIsOpen(!isOpen)}>
+          {isOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+        {!isOpen && (
+          <div className={styles.mobileLogo}>
+            <Image 
+              src="/logo.png" 
+              alt="Rivo" 
+              width={120} 
+              height={30} 
+              priority
+            />
+          </div>
+        )}
+      </div>
 
       {/* Overlay for mobile */}
       {isOpen && <div className={styles.overlay} onClick={() => setIsOpen(false)} />}
