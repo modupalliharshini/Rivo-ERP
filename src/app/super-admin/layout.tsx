@@ -14,7 +14,7 @@ export default function SuperAdminLayout({
         <div className={styles.container}>
           {children}
           <footer className={styles.footer}>
-            Rivo ERP - Super Admin Interface
+            Powered by <a href="https://thepatternscompany.com/" target="_blank" rel="noopener noreferrer" style={{color: 'var(--text-highlight)', fontWeight: '600'}}>The Patterns Company</a>
           </footer>
         </div>
       </div>

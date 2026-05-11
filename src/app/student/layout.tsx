@@ -14,7 +14,7 @@ export default function StudentLayout({
         <div className={styles.pageContainer}>
           {children}
           <footer className={styles.footer}>
-            This is a visual preview of the Rivo Student Portal.
+            Powered by <a href="https://thepatternscompany.com/" target="_blank" rel="noopener noreferrer" style={{color: '#dc2626', fontWeight: '600'}}>The Patterns Company</a>
           </footer>
         </div>
       </div>

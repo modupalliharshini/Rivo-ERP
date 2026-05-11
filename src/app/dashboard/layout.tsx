@@ -14,7 +14,7 @@ export default function DashboardLayout({
         <div className={styles.container}>
           {children}
           <footer className={styles.footer}>
-            This is a visual preview of the Rivo ERP dashboard interface.
+            Powered by <a href="https://thepatternscompany.com/" target="_blank" rel="noopener noreferrer" style={{color: 'var(--text-highlight)', fontWeight: '600'}}>The Patterns Company</a>
           </footer>
         </div>
       </div>
