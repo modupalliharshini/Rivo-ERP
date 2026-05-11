@@ -12,6 +12,12 @@ interface Profile {
   email: string;
   role: string;
   institution_id: string | null;
+  grade?: string;
+  section?: string;
+  phone?: string;
+  specialization?: string;
+  designation?: string;
+  experience?: string;
 }
 
 interface InstitutionOption { id: string; name: string; }
@@ -30,6 +36,12 @@ export default function EditUserModal({ user, isOpen, onClose, onSuccess }: Edit
     role: 'admin',
     password: '',
     institutionId: '',
+    grade: '',
+    section: '',
+    phone: '',
+    specialization: 'Science',
+    designation: '',
+    experience: ''
   });
   const [institutions, setInstitutions] = useState<InstitutionOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -45,6 +57,12 @@ export default function EditUserModal({ user, isOpen, onClose, onSuccess }: Edit
         role: user.role,
         password: '',
         institutionId: user.institution_id || '',
+        grade: user.grade || '',
+        section: user.section || '',
+        phone: user.phone || '',
+        specialization: user.specialization || 'Science',
+        designation: user.designation || '',
+        experience: user.experience || ''
       });
       setError('');
       supabase.from('institutions').select('id, name').order('name').then(({ data }) => {
@@ -78,6 +96,12 @@ export default function EditUserModal({ user, isOpen, onClose, onSuccess }: Edit
           role: formData.role,
           password: formData.password || undefined,
           institutionId: formData.institutionId || null,
+          grade: formData.grade,
+          section: formData.section,
+          phone: formData.phone,
+          specialization: formData.specialization,
+          designation: formData.designation,
+          experience: formData.experience
         },
       });
 
@@ -147,6 +171,48 @@ export default function EditUserModal({ user, isOpen, onClose, onSuccess }: Edit
                   ))}
                 </select>
               </div>
+
+              {/* Conditional fields for Student */}
+              {formData.role === 'student' && (
+                <>
+                  <div className={styles.formGroup}>
+                    <label>Grade / Class</label>
+                    <input type="text" name="grade" className={styles.formInput} value={formData.grade} onChange={handleChange} required />
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label>Section</label>
+                    <input type="text" name="section" className={styles.formInput} value={formData.section} onChange={handleChange} required />
+                  </div>
+                  <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+                    <label>Parent/Guardian Phone</label>
+                    <input type="tel" name="phone" className={styles.formInput} value={formData.phone} onChange={handleChange} required />
+                  </div>
+                </>
+              )}
+
+              {/* Conditional fields for Faculty */}
+              {formData.role === 'faculty' && (
+                <>
+                  <div className={styles.formGroup}>
+                    <label>Department</label>
+                    <select name="specialization" className={styles.formSelect} value={formData.specialization} onChange={handleChange}>
+                      <option value="Science">Science</option>
+                      <option value="Mathematics">Mathematics</option>
+                      <option value="Computer Science">Computer Science</option>
+                      <option value="Arts">Arts</option>
+                      <option value="Commerce">Commerce</option>
+                    </select>
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label>Designation</label>
+                    <input type="text" name="designation" className={styles.formInput} value={formData.designation} onChange={handleChange} required />
+                  </div>
+                  <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+                    <label>Experience</label>
+                    <input type="text" name="experience" className={styles.formInput} value={formData.experience} onChange={handleChange} required />
+                  </div>
+                </>
+              )}
             </div>
           </div>
 

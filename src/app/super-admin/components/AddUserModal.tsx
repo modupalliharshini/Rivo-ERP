@@ -21,6 +21,12 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
     password: '',
     role: 'admin',
     institutionId: '',
+    grade: '',
+    section: '',
+    phone: '',
+    specialization: 'Science',
+    designation: '',
+    experience: ''
   });
   const [institutions, setInstitutions] = useState<InstitutionOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +36,20 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
 
   useEffect(() => {
     if (isOpen) {
-      setFormData({ firstName: '', lastName: '', userId: '', password: '', role: 'admin', institutionId: '' });
+      setFormData({
+        firstName: '',
+        lastName: '',
+        userId: '',
+        password: '',
+        role: 'admin',
+        institutionId: '',
+        grade: '',
+        section: '',
+        phone: '',
+        specialization: 'Science',
+        designation: '',
+        experience: ''
+      });
       setError('');
       supabase.from('institutions').select('id, name').order('name').then(({ data }) => {
         setInstitutions(data || []);
@@ -61,6 +80,7 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
 
     try {
       const emailPayload = formData.userId.includes('@') ? formData.userId : `${formData.userId}@rivo.local`;
+      
       const payload = { 
         ...formData, 
         email: emailPayload, 
@@ -103,7 +123,7 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
               </div>
 
               <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-                <label>User ID</label>
+                <label>User ID (ad123, fa456, st789)</label>
                 <input type="text" name="userId" className={styles.formInput}
                   value={formData.userId} onChange={handleChange}
                   placeholder="e.g. ad123, fa456, st789"
@@ -135,6 +155,48 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
                   ))}
                 </select>
               </div>
+
+              {/* Conditional fields for Student */}
+              {formData.role === 'student' && (
+                <>
+                  <div className={styles.formGroup}>
+                    <label>Grade / Class</label>
+                    <input type="text" name="grade" className={styles.formInput} value={formData.grade} onChange={handleChange} required />
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label>Section</label>
+                    <input type="text" name="section" className={styles.formInput} value={formData.section} onChange={handleChange} required />
+                  </div>
+                  <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+                    <label>Parent/Guardian Phone</label>
+                    <input type="tel" name="phone" className={styles.formInput} value={formData.phone} onChange={handleChange} required />
+                  </div>
+                </>
+              )}
+
+              {/* Conditional fields for Faculty */}
+              {formData.role === 'faculty' && (
+                <>
+                  <div className={styles.formGroup}>
+                    <label>Department</label>
+                    <select name="specialization" className={styles.formSelect} value={formData.specialization} onChange={handleChange}>
+                      <option value="Science">Science</option>
+                      <option value="Mathematics">Mathematics</option>
+                      <option value="Computer Science">Computer Science</option>
+                      <option value="Arts">Arts</option>
+                      <option value="Commerce">Commerce</option>
+                    </select>
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label>Designation</label>
+                    <input type="text" name="designation" className={styles.formInput} value={formData.designation} onChange={handleChange} required />
+                  </div>
+                  <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+                    <label>Experience</label>
+                    <input type="text" name="experience" className={styles.formInput} value={formData.experience} onChange={handleChange} required />
+                  </div>
+                </>
+              )}
             </div>
           </div>
 

@@ -43,7 +43,11 @@ serve(async (req) => {
       });
     }
 
-    const { targetUserId, firstName, lastName, role, password, institutionId } = await req.json();
+    const reqData = await req.json();
+    const { 
+      targetUserId, firstName, lastName, role, password, institutionId,
+      grade, section, phone, specialization, designation, experience
+    } = reqData;
 
     if (!targetUserId) {
       return new Response(JSON.stringify({ error: "targetUserId is required" }), {
@@ -72,6 +76,14 @@ serve(async (req) => {
     if (lastName !== undefined) profileUpdates.last_name = lastName;
     if (role) profileUpdates.role = role;
     if (institutionId !== undefined) profileUpdates.institution_id = institutionId || null;
+    
+    // extra fields
+    if (grade !== undefined) profileUpdates.grade = grade || null;
+    if (section !== undefined) profileUpdates.section = section || null;
+    if (phone !== undefined) profileUpdates.phone = phone || null;
+    if (specialization !== undefined) profileUpdates.specialization = specialization || null;
+    if (designation !== undefined) profileUpdates.designation = designation || null;
+    if (experience !== undefined) profileUpdates.experience = experience || null;
 
     if (Object.keys(profileUpdates).length > 0) {
       const { error: profileError } = await supabaseClient

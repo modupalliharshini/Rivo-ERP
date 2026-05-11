@@ -200,6 +200,27 @@ export default function GlobalUsers() {
                             >
                               <Pencil size={14} /> Edit User
                             </button>
+                            <button
+                              onClick={async () => {
+                                if (confirm(`Are you sure you want to delete ${user.first_name} ${user.last_name}?`)) {
+                                  setOpenMenuId(null);
+                                  const { error: delErr } = await supabase.functions.invoke('delete-user', {
+                                    body: { targetUserId: user.id }
+                                  });
+                                  if (delErr) alert(delErr.message);
+                                  else fetchUsers();
+                                }
+                              }}
+                              style={{
+                                display: 'flex', alignItems: 'center', gap: '0.6rem',
+                                width: '100%', padding: '0.75rem 1rem', background: 'none',
+                                border: 'none', cursor: 'pointer', fontSize: '0.9rem', color: '#ef4444', fontWeight: 500
+                              }}
+                              onMouseEnter={e => (e.currentTarget.style.background = '#fef2f2')}
+                              onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+                            >
+                              <X size={14} /> Delete User
+                            </button>
                           </div>
                         )}
                       </div>

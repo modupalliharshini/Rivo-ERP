@@ -25,7 +25,10 @@ serve(async (req) => {
     );
 
     const reqData = await req.json();
-    const { email, password, role, firstName, lastName, institutionId } = reqData;
+    const { 
+      email, password, role, firstName, lastName, institutionId,
+      grade, section, phone, specialization, designation, experience
+    } = reqData;
 
     // Optional: Bootstrapping check - if no profiles exist, allow creating the first super_admin
     const { count: profileCount } = await supabaseClient
@@ -84,6 +87,12 @@ serve(async (req) => {
         first_name: firstName,
         last_name: lastName,
         institution_id: institutionId || null,
+        grade: grade || null,
+        section: section || null,
+        phone: phone || null,
+        specialization: specialization || null,
+        designation: designation || null,
+        experience: experience || null
       });
 
     if (profileError) {

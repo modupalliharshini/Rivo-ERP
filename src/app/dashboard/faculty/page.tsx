@@ -1,40 +1,126 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PageHeader from '../../components/PageHeader';
 import StatCard from '../components/StatCard';
 import Modal from '../components/Modal';
 import styles from './page.module.css';
-import { Plus, Star } from 'lucide-react';
+import { Plus, Star, Loader2 } from 'lucide-react';
+import { createClient } from '@/utils/supabase/client';
 
-const INITIAL_FACULTY = [
-  { id: 1, name: 'Dr. Robert Miller', dept: 'Science', title: 'Head of Dept', exp: '15 Years', rating: 4.9, status: 'Present' },
-  { id: 2, name: 'Sarah Jenkins', dept: 'Mathematics', title: 'Senior Lecturer', exp: '8 Years', rating: 4.7, status: 'In Session' },
-  { id: 3, name: 'Prof. David Green', dept: 'Computer Science', title: 'Professor', exp: '22 Years', rating: 5.0, status: 'On Leave' },
-];
+interface Faculty {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  specialization: string;
+  designation: string;
+  experience: string;
+  status?: string;
+  rating?: number;
+}
 
 export default function FacultyPage() {
-  const [facultyList, setFacultyList] = useState(INITIAL_FACULTY);
+  const [facultyList, setFacultyList] = useState<Faculty[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+
   const [newMember, setNewMember] = useState({
-    name: '',
-    dept: 'Science',
-    title: '',
-    exp: '',
+    firstName: '',
+    lastName: '',
+    facultyId: '', // custom id like fa123
+    password: '',
+    specialization: 'Science',
+    designation: '',
+    experience: '',
     status: 'Present'
   });
 
-  const handleHireMember = (e: React.FormEvent) => {
-    e.preventDefault();
-    const joinedMember = {
-      ...newMember,
-      id: facultyList.length + 1,
-      rating: 5.0, // New hires start with a perfect 5.0
-    };
-    setFacultyList([joinedMember, ...facultyList]);
-    setIsModalOpen(false);
-    setNewMember({ name: '', dept: 'Science', title: '', exp: '', status: 'Present' });
+  const supabase = createClient();
+
+  const fetchFaculty = async () => {
+    setIsLoading(true);
+    const { data, error: fetchError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('role', 'faculty')
+      .order('created_at', { ascending: false });
+
+    if (fetchError) {
+      console.error('Error fetching faculty:', fetchError);
+    } else {
+      setFacultyList(data || []);
+    }
+    setIsLoading(false);
   };
+
+  useEffect(() => {
+    fetchFaculty();
+  }, []);
+
+  const handleHireMember = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError('');
+
+    try {
+      const idLower = newMember.facultyId.toLowerCase();
+      if (!idLower.startsWith('fa')) {
+        throw new Error('Faculty ID must start with "fa"');
+      }
+
+      const emailPayload = idLower.includes('@') ? idLower : `${idLower}@rivo.local`;
+      
+      // Get current admin's institution
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: profile } = await supabase.from('profiles').select('institution_id').eq('id', user?.id).single();
+
+      const payload = {
+        firstName: newMember.firstName,
+        lastName: newMember.lastName,
+        email: emailPayload,
+        password: newMember.password,
+        role: 'faculty',
+        institutionId: profile?.institution_id,
+        specialization: newMember.specialization,
+        designation: newMember.designation,
+        experience: newMember.experience
+      };
+
+      const { data, error: invokeError } = await supabase.functions.invoke('create-user', {
+        body: payload
+      });
+
+      if (invokeError) throw invokeError;
+      if (data?.error) throw new Error(data.error);
+
+      setIsModalOpen(false);
+      setNewMember({
+        firstName: '',
+        lastName: '',
+        facultyId: '',
+        password: '',
+        specialization: 'Science',
+        designation: '',
+        experience: '',
+        status: 'Present'
+      });
+      fetchFaculty();
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const filteredFaculty = facultyList.filter(f => {
+    const fullName = `${f.first_name} ${f.last_name}`.toLowerCase();
+    const facultyId = f.email.replace('@rivo.local', '').toLowerCase();
+    return fullName.includes(searchQuery.toLowerCase()) || facultyId.includes(searchQuery.toLowerCase());
+  });
 
   return (
     <div className={styles.container}>
@@ -50,10 +136,10 @@ export default function FacultyPage() {
 
       <section className={styles.statsGrid}>
         <div className={styles.statWrapper}>
-          <StatCard title="Staff Strength" value={facultyList.length.toString()} trend="" trendType="neutral" />
+          <StatCard title="Staff Strength" value={isLoading ? '...' : facultyList.length.toString()} trend="" trendType="neutral" />
         </div>
         <div className={styles.statWrapper}>
-          <StatCard title="On Leave" value={facultyList.filter(f => f.status === 'On Leave').length.toString()} trend="" trendType="neutral" />
+          <StatCard title="On Leave" value="0" trend="" trendType="neutral" />
         </div>
         <div className={styles.statWrapper}>
           <StatCard title="Department Count" value="12" trend="" trendType="neutral" />
@@ -61,43 +147,46 @@ export default function FacultyPage() {
       </section>
 
       <section className={`${styles.tableCard} card-shadow`}>
-        <h2 className={styles.tableTitle}>Staff Directory</h2>
+        <div className={styles.tableHeader}>
+          <h2 className={styles.tableTitle}>Staff Directory</h2>
+          <input 
+            type="text" 
+            placeholder="Search staff..." 
+            className={styles.searchInput} 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
 
         <table className={styles.table}>
           <thead>
             <tr>
               <th>Staff Name</th>
+              <th>Staff ID</th>
               <th>Department</th>
               <th>Designation</th>
               <th>Experience</th>
-              <th>Rating</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody>
-            {facultyList.map((faculty) => (
+            {isLoading ? (
+              <tr>
+                <td colSpan={6} style={{ textAlign: 'center', padding: '2rem' }}>Loading staff...</td>
+              </tr>
+            ) : filteredFaculty.length === 0 ? (
+              <tr>
+                <td colSpan={6} style={{ textAlign: 'center', padding: '2rem' }}>No staff found</td>
+              </tr>
+            ) : filteredFaculty.map((faculty) => (
               <tr key={faculty.id}>
-                <td>{faculty.name}</td>
-                <td>{faculty.dept}</td>
-                <td>{faculty.title}</td>
-                <td>{faculty.exp}</td>
+                <td>{faculty.first_name} {faculty.last_name}</td>
+                <td>{faculty.email.replace('@rivo.local', '').toUpperCase()}</td>
+                <td>{faculty.specialization}</td>
+                <td>{faculty.designation || '—'}</td>
+                <td>{faculty.experience || '—'}</td>
                 <td>
-                  <span className={styles.rating}>
-                    <Star size={16} fill="currentColor" className={styles.star} /> {faculty.rating.toFixed(1)}
-                  </span>
-                </td>
-                <td>
-                  <span
-                    className={`${styles.badge} ${
-                      faculty.status === 'Present'
-                        ? styles.badgePresent
-                        : faculty.status === 'In Session'
-                        ? styles.badgeSession
-                        : styles.badgeLeave
-                    }`}
-                  >
-                    {faculty.status}
-                  </span>
+                  <span className={`${styles.badge} ${styles.badgePresent}`}>Present</span>
                 </td>
               </tr>
             ))}
@@ -111,25 +200,64 @@ export default function FacultyPage() {
         title="Hire Faculty Member"
       >
         <form className="erp-form" onSubmit={handleHireMember}>
-          <div className="erp-form-group">
-            <label>Full Name</label>
-            <input
-              className="erp-input"
-              type="text"
-              placeholder="e.g. Dr. Jane Smith"
-              required
-              value={newMember.name}
-              onChange={(e) => setNewMember({...newMember, name: e.target.value})}
-            />
+          {error && <div style={{ color: '#ef4444', marginBottom: '1rem', fontSize: '0.9rem', fontWeight: 500 }}>{error}</div>}
+          
+          <div className="erp-form-row">
+            <div className="erp-form-group">
+              <label>First Name</label>
+              <input
+                className="erp-input"
+                type="text"
+                required
+                value={newMember.firstName}
+                onChange={(e) => setNewMember({...newMember, firstName: e.target.value})}
+              />
+            </div>
+            <div className="erp-form-group">
+              <label>Last Name</label>
+              <input
+                className="erp-input"
+                type="text"
+                required
+                value={newMember.lastName}
+                onChange={(e) => setNewMember({...newMember, lastName: e.target.value})}
+              />
+            </div>
           </div>
 
           <div className="erp-form-row">
             <div className="erp-form-group">
-              <label>Department</label>
+              <label>Faculty ID (e.g. fa123)</label>
+              <input
+                className="erp-input"
+                type="text"
+                required
+                autoComplete="off"
+                value={newMember.facultyId}
+                onChange={(e) => setNewMember({...newMember, facultyId: e.target.value})}
+              />
+            </div>
+            <div className="erp-form-group">
+              <label>Password</label>
+              <input
+                className="erp-input"
+                type="password"
+                required
+                minLength={6}
+                autoComplete="new-password"
+                value={newMember.password}
+                onChange={(e) => setNewMember({...newMember, password: e.target.value})}
+              />
+            </div>
+          </div>
+
+          <div className="erp-form-row">
+            <div className="erp-form-group">
+              <label>Department / Specialization</label>
               <select
                 className="erp-select"
-                value={newMember.dept}
-                onChange={(e) => setNewMember({...newMember, dept: e.target.value})}
+                value={newMember.specialization}
+                onChange={(e) => setNewMember({...newMember, specialization: e.target.value})}
               >
                 <option value="Science">Science</option>
                 <option value="Mathematics">Mathematics</option>
@@ -145,44 +273,30 @@ export default function FacultyPage() {
                 type="text"
                 placeholder="e.g. Professor"
                 required
-                value={newMember.title}
-                onChange={(e) => setNewMember({...newMember, title: e.target.value})}
+                value={newMember.designation}
+                onChange={(e) => setNewMember({...newMember, designation: e.target.value})}
               />
             </div>
           </div>
 
-          <div className="erp-form-row">
-            <div className="erp-form-group">
-              <label>Experience</label>
-              <input
-                className="erp-input"
-                type="text"
-                placeholder="e.g. 10 Years"
-                required
-                value={newMember.exp}
-                onChange={(e) => setNewMember({...newMember, exp: e.target.value})}
-              />
-            </div>
-            <div className="erp-form-group">
-              <label>Initial Status</label>
-              <select
-                className="erp-select"
-                value={newMember.status}
-                onChange={(e) => setNewMember({...newMember, status: e.target.value})}
-              >
-                <option value="Present">Present</option>
-                <option value="In Session">In Session</option>
-                <option value="On Leave">On Leave</option>
-              </select>
-            </div>
+          <div className="erp-form-group">
+            <label>Experience</label>
+            <input
+              className="erp-input"
+              type="text"
+              placeholder="e.g. 10 Years"
+              required
+              value={newMember.experience}
+              onChange={(e) => setNewMember({...newMember, experience: e.target.value})}
+            />
           </div>
 
           <div className="erp-form-actions">
-            <button type="button" className="erp-btn-cancel" onClick={() => setIsModalOpen(false)}>
+            <button type="button" className="erp-btn-cancel" onClick={() => setIsModalOpen(false)} disabled={isSubmitting}>
               Cancel
             </button>
-            <button type="submit" className="erp-btn-submit">
-              Complete Hiring
+            <button type="submit" className="erp-btn-submit" disabled={isSubmitting}>
+              {isSubmitting ? <><Loader2 className="spin" size={16} /> Saving...</> : 'Complete Hiring'}
             </button>
           </div>
         </form>
