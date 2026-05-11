@@ -1,12 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  MoreVertical,
-  ChevronDown,
-  Plus,
-  Pencil
-} from 'lucide-react';
+import { MoreVertical, ChevronDown, Plus, Pencil } from 'lucide-react';
 import styles from '../page.module.css';
 import sectionStyles from '../sections/Sections.module.css';
 import SuperAdminHeader from '../../components/SuperAdminHeader';
@@ -22,15 +17,20 @@ type Profile = {
   role: string;
   institution_id: string | null;
   created_at: string;
+  institution?: { id: string; name: string } | null;
 }
+
+type Institution = { id: string; name: string };
 
 export default function GlobalUsers() {
   const [selectedRole, setSelectedRole] = useState('All Roles');
+  const [selectedInstitution, setSelectedInstitution] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editUser, setEditUser] = useState<Profile | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [users, setUsers] = useState<Profile[]>([]);
+  const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -40,20 +40,23 @@ export default function GlobalUsers() {
     setIsLoading(true);
     const { data, error } = await supabase
       .from('profiles')
-      .select('*')
+      .select('*, institution:institutions!profiles_institution_id_fkey(id, name)')
       .order('created_at', { ascending: false });
 
-    if (!error && data) {
-      setUsers(data);
-    }
+    if (!error && data) setUsers(data as Profile[]);
     setIsLoading(false);
+  };
+
+  const fetchInstitutions = async () => {
+    const { data } = await supabase.from('institutions').select('id, name').order('name');
+    setInstitutions(data || []);
   };
 
   useEffect(() => {
     fetchUsers();
+    fetchInstitutions();
   }, []);
 
-  // Close action menu on outside click
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -67,24 +70,29 @@ export default function GlobalUsers() {
   const filteredUsers = users.filter(user => {
     const displayRole = user.role.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
     const matchesRole = selectedRole === 'All Roles' || displayRole.toLowerCase().includes(selectedRole.toLowerCase());
+    const matchesInstitution = !selectedInstitution || user.institution_id === selectedInstitution;
     const fullName = `${user.first_name} ${user.last_name}`.toLowerCase();
-    const matchesSearch = fullName.includes(searchQuery.toLowerCase()) || 
+    const matchesSearch = fullName.includes(searchQuery.toLowerCase()) ||
                           user.email.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesRole && matchesSearch;
+    return matchesRole && matchesInstitution && matchesSearch;
   });
 
-  const getInitials = (first: string, last: string) => {
-    return `${first?.charAt(0) || ''}${last?.charAt(0) || ''}`.toUpperCase();
-  };
+  const getInitials = (first: string, last: string) =>
+    `${first?.charAt(0) || ''}${last?.charAt(0) || ''}`.toUpperCase();
 
-  const getDisplayRole = (role: string) => {
-    return role.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-  };
+  const getDisplayRole = (role: string) =>
+    role.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
-  const formatDate = (dateString: string) => {
-    return new Intl.DateTimeFormat('en-US', { 
-      month: 'short', day: 'numeric', year: 'numeric' 
-    }).format(new Date(dateString));
+  const formatDate = (dateString: string) =>
+    new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(dateString));
+
+  const selectStyle = {
+    appearance: 'none' as const, border: 'none', background: 'transparent',
+    fontSize: '0.9rem', color: '#1e293b', paddingRight: '1.5rem', cursor: 'pointer', outline: 'none', zIndex: 2
+  };
+  const selectWrapper = {
+    position: 'relative' as const, display: 'flex', alignItems: 'center',
+    border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0 1rem', background: 'white', height: '40px'
   };
 
   return (
@@ -92,39 +100,43 @@ export default function GlobalUsers() {
       <SuperAdminHeader title="Global" highlight="Users" />
 
       <div className={sectionStyles.sectionContainer}>
-        <div className={sectionStyles.cardHeader} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem'}}>
+        <div className={sectionStyles.cardHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <h3 className={sectionStyles.cardTitle}>User Directory</h3>
-          <div style={{display: 'flex', gap: '1rem', flexWrap: 'wrap'}}>
-             <div style={{position: 'relative', display: 'flex', alignItems: 'center', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0 1rem', background: 'white', height: '40px'}}>
-                <select 
-                  value={selectedRole}
-                  onChange={(e) => setSelectedRole(e.target.value)}
-                  style={{ appearance: 'none', border: 'none', background: 'transparent', fontSize: '0.9rem', color: '#1e293b', paddingRight: '1.5rem', cursor: 'pointer', outline: 'none', zIndex: 2 }}
-                >
-                   <option>All Roles</option>
-                   <option>Admin</option>
-                   <option>Faculty</option>
-                   <option>Student</option>
-                   <option>Super Admin</option>
-                </select>
-                <ChevronDown size={14} color="#64748b" style={{position: 'absolute', right: '12px', pointerEvents: 'none'}} />
-             </div>
-             <div className={sectionStyles.searchGroup} style={{height: '40px'}}>
-                <input 
-                  type="text" 
-                  placeholder="Search users..." 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-             </div>
-             <button 
-               className={sectionStyles.btnPost} 
-               style={{ height: '40px', padding: '0 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-               onClick={() => setIsAddModalOpen(true)}
-              >
-               <Plus size={18} />
-               Add New User
-             </button>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+
+            {/* Role filter */}
+            <div style={selectWrapper}>
+              <select value={selectedRole} onChange={e => setSelectedRole(e.target.value)} style={selectStyle}>
+                <option>All Roles</option>
+                <option>Admin</option>
+                <option>Faculty</option>
+                <option>Student</option>
+                <option>Super Admin</option>
+              </select>
+              <ChevronDown size={14} color="#64748b" style={{ position: 'absolute', right: '12px', pointerEvents: 'none' }} />
+            </div>
+
+            {/* Institution filter */}
+            <div style={selectWrapper}>
+              <select value={selectedInstitution} onChange={e => setSelectedInstitution(e.target.value)} style={selectStyle}>
+                <option value="">All Institutions</option>
+                {institutions.map(inst => (
+                  <option key={inst.id} value={inst.id}>{inst.name}</option>
+                ))}
+              </select>
+              <ChevronDown size={14} color="#64748b" style={{ position: 'absolute', right: '12px', pointerEvents: 'none' }} />
+            </div>
+
+            <div className={sectionStyles.searchGroup} style={{ height: '40px' }}>
+              <input type="text" placeholder="Search users..."
+                value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+            </div>
+
+            <button className={sectionStyles.btnPost}
+              style={{ height: '40px', padding: '0 1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+              onClick={() => setIsAddModalOpen(true)}>
+              <Plus size={18} /> Add New User
+            </button>
           </div>
         </div>
 
@@ -135,6 +147,7 @@ export default function GlobalUsers() {
                 <th>User</th>
                 <th>User ID / Email</th>
                 <th>Role</th>
+                <th>Institution</th>
                 <th>Joined</th>
                 <th>Status</th>
                 <th>Action</th>
@@ -142,37 +155,31 @@ export default function GlobalUsers() {
             </thead>
             <tbody>
               {isLoading ? (
-                <tr>
-                  <td colSpan={6} style={{textAlign: 'center', padding: '3rem', color: '#64748b'}}>Loading users...</td>
-                </tr>
+                <tr><td colSpan={7} style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>Loading users...</td></tr>
               ) : filteredUsers.map((user) => (
                 <tr key={user.id}>
                   <td>
-                    <div style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
-                      <div style={{width: 36, height: 36, borderRadius: '12px', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: '600', color: '#475569'}}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <div style={{ width: 36, height: 36, borderRadius: '12px', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: '600', color: '#475569' }}>
                         {getInitials(user.first_name, user.last_name)}
                       </div>
-                      <span style={{fontWeight: '500'}}>{user.first_name} {user.last_name}</span>
+                      <span style={{ fontWeight: '500' }}>{user.first_name} {user.last_name}</span>
                     </div>
                   </td>
                   <td>{user.email.endsWith('@rivo.local') ? user.email.replace('@rivo.local', '') : user.email}</td>
                   <td>{getDisplayRole(user.role)}</td>
+                  <td>{user.institution?.name || <span style={{ color: '#94a3b8' }}>—</span>}</td>
                   <td>{formatDate(user.created_at)}</td>
                   <td>
-                    <span className={`${sectionStyles.statusBadge} ${sectionStyles.active}`}>
-                      Active
-                    </span>
+                    <span className={`${sectionStyles.statusBadge} ${sectionStyles.active}`}>Active</span>
                   </td>
                   <td style={{ position: 'relative' }}>
                     {user.role === 'super_admin' ? (
                       <span style={{ color: '#cbd5e1', fontSize: '0.8rem' }}>—</span>
                     ) : (
                       <div ref={openMenuId === user.id ? menuRef : null} style={{ position: 'relative', display: 'inline-block' }}>
-                        <button 
-                          className={sectionStyles.tableActionBtn} 
-                          title="Options"
-                          onClick={() => setOpenMenuId(openMenuId === user.id ? null : user.id)}
-                        >
+                        <button className={sectionStyles.tableActionBtn} title="Options"
+                          onClick={() => setOpenMenuId(openMenuId === user.id ? null : user.id)}>
                           <MoreVertical size={16} />
                         </button>
                         {openMenuId === user.id && (
@@ -182,21 +189,16 @@ export default function GlobalUsers() {
                             boxShadow: '0 4px 16px rgba(0,0,0,0.10)', minWidth: '130px', overflow: 'hidden'
                           }}>
                             <button
-                              onClick={() => {
-                                setEditUser(user);
-                                setOpenMenuId(null);
-                              }}
+                              onClick={() => { setEditUser(user); setOpenMenuId(null); }}
                               style={{
                                 display: 'flex', alignItems: 'center', gap: '0.6rem',
                                 width: '100%', padding: '0.75rem 1rem', background: 'none',
-                                border: 'none', cursor: 'pointer', fontSize: '0.9rem', color: '#1e293b',
-                                fontWeight: 500, transition: 'background 0.15s'
+                                border: 'none', cursor: 'pointer', fontSize: '0.9rem', color: '#1e293b', fontWeight: 500
                               }}
                               onMouseEnter={e => (e.currentTarget.style.background = '#f1f5f9')}
                               onMouseLeave={e => (e.currentTarget.style.background = 'none')}
                             >
-                              <Pencil size={14} />
-                              Edit User
+                              <Pencil size={14} /> Edit User
                             </button>
                           </div>
                         )}
@@ -206,27 +208,18 @@ export default function GlobalUsers() {
                 </tr>
               ))}
               {!isLoading && filteredUsers.length === 0 && (
-                <tr>
-                  <td colSpan={6} style={{textAlign: 'center', paddingTop: '3rem', paddingBottom: '3rem', color: '#64748b'}}>No users found matching your criteria.</td>
-                </tr>
+                <tr><td colSpan={7} style={{ textAlign: 'center', paddingTop: '3rem', paddingBottom: '3rem', color: '#64748b' }}>No users found.</td></tr>
               )}
             </tbody>
           </table>
         </div>
       </div>
 
-      <AddUserModal 
-        isOpen={isAddModalOpen} 
-        onClose={() => setIsAddModalOpen(false)} 
-        onSuccess={() => { setIsAddModalOpen(false); fetchUsers(); }}
-      />
+      <AddUserModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)}
+        onSuccess={() => { setIsAddModalOpen(false); fetchUsers(); }} />
 
-      <EditUserModal
-        user={editUser}
-        isOpen={!!editUser}
-        onClose={() => setEditUser(null)}
-        onSuccess={() => { setEditUser(null); fetchUsers(); }}
-      />
+      <EditUserModal user={editUser} isOpen={!!editUser} onClose={() => setEditUser(null)}
+        onSuccess={() => { setEditUser(null); fetchUsers(); }} />
     </div>
   );
 }

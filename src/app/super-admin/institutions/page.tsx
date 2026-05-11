@@ -1,52 +1,77 @@
 'use client';
 
-import React, { useState } from 'react';
-import { 
-  Plus, 
-  Search, 
-  Edit3
-} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Search, Edit3 } from 'lucide-react';
 import styles from '../page.module.css';
 import sectionStyles from '../sections/Sections.module.css';
 import SuperAdminHeader from '../../components/SuperAdminHeader';
-import Modal from '../../dashboard/components/Modal';
+import AddInstitutionModal from '../components/AddInstitutionModal';
+import EditInstitutionModal from '../components/EditInstitutionModal';
+import { createClient } from '@/utils/supabase/client';
 
-const INITIAL_INSTITUTIONS = [
-  { id: 1, name: 'Greenwood High School', location: 'Hyderabad', contact: 'smith@greenwood.com', status: 'Active', plan: 'Premium AI' },
-  { id: 2, name: 'St. Xavier\'s College', location: 'Bangalore', contact: 'miller@stxaviers.edu', status: 'Active', plan: 'Standard' },
-  { id: 3, name: 'Sunshine International', location: 'Delhi', contact: 'garcia@sunshine.ac.in', status: 'Expiring', plan: 'Basic' },
-  { id: 4, name: 'Oakridge School', location: 'Mumbai', contact: 'wilson@oakridge.edu', status: 'Active', plan: 'Enterprise' },
-];
+type Institution = {
+  id: string;
+  name: string;
+  location: string;
+  plan: string;
+  status: string;
+  admin_id: string | null;
+  created_at: string;
+  admin?: {
+    first_name: string;
+    last_name: string;
+    email: string;
+  } | null;
+};
 
 export default function InstitutionsManagement() {
-  const [institutions, setInstitutions] = useState(INITIAL_INSTITUTIONS);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newInstitution, setNewInstitution] = useState({
-    name: '',
-    location: '',
-    contact: '',
-    plan: 'Standard',
-    status: 'Active'
-  });
+  const [institutions, setInstitutions] = useState<Institution[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [editInstitution, setEditInstitution] = useState<Institution | null>(null);
 
-  const handleAddInstitution = (e: React.FormEvent) => {
-    e.preventDefault();
-    const institutionWithId = {
-      ...newInstitution,
-      id: Date.now()
-    };
-    setInstitutions([institutionWithId, ...institutions]);
-    setIsModalOpen(false);
-    setNewInstitution({ name: '', location: '', contact: '', plan: 'Standard', status: 'Active' });
+  const supabase = createClient();
+
+  const fetchInstitutions = async () => {
+    setIsLoading(true);
+    const { data, error } = await supabase
+      .from('institutions')
+      .select(`
+        id, name, location, plan, status, admin_id, created_at,
+        admin:profiles!institutions_admin_id_fkey(first_name, last_name, email)
+      `)
+      .order('created_at', { ascending: false });
+
+    if (!error && data) {
+      setInstitutions(data as unknown as Institution[]);
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    fetchInstitutions();
+  }, []);
+
+  const filtered = institutions.filter(inst =>
+    inst.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    inst.location?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const getAdminDisplay = (inst: Institution) => {
+    if (!inst.admin) return <span style={{ color: '#94a3b8' }}>— Not Assigned</span>;
+    const name = `${inst.admin.first_name || ''} ${inst.admin.last_name || ''}`.trim();
+    const id = inst.admin.email?.replace('@rivo.local', '');
+    return name ? `${name} (${id})` : id;
   };
 
   const addBtn = (
-    <button 
-      className={sectionStyles.btnPost} 
-      onClick={() => setIsModalOpen(true)}
-      style={{display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#3b82f6', color: 'white', padding: '0.7rem 1.2rem', borderRadius: '10px', fontWeight: '600', border: 'none', cursor: 'pointer'}}
+    <button
+      className={sectionStyles.btnPost}
+      onClick={() => setIsAddOpen(true)}
+      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#3b82f6', color: 'white', padding: '0.7rem 1.2rem', borderRadius: '10px', fontWeight: '600', border: 'none', cursor: 'pointer' }}
     >
-       <Plus size={20} /> Add Institution
+      <Plus size={20} /> Add Institution
     </button>
   );
 
@@ -55,11 +80,16 @@ export default function InstitutionsManagement() {
       <SuperAdminHeader title="Institutions" highlight="Management" actionElement={addBtn} />
 
       <div className={sectionStyles.sectionContainer}>
-        <div className={sectionStyles.cardHeader} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+        <div className={sectionStyles.cardHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 className={sectionStyles.cardTitle}>All Partnered Institutions</h3>
           <div className={sectionStyles.searchGroup}>
-            <input type="text" placeholder="Search institutions..." />
-            <div className={sectionStyles.searchBtn}><Search size={20} /></div>
+            <input
+              type="text"
+              placeholder="Search institutions..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+            />
+            <div className={sectionStyles.searchBtn}><Search size={18} /></div>
           </div>
         </div>
 
@@ -69,117 +99,63 @@ export default function InstitutionsManagement() {
               <tr>
                 <th>Institution Name</th>
                 <th>Location</th>
-                <th>Admin Contact</th>
+                <th>Assigned Admin</th>
                 <th>Status</th>
                 <th>License Plan</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              {institutions.map((school) => (
-                <tr key={school.id}>
-                  <td>{school.name}</td>
-                  <td>{school.location}</td>
-                  <td>{school.contact}</td>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>Loading institutions...</td>
+                </tr>
+              ) : filtered.map((inst) => (
+                <tr key={inst.id}>
+                  <td style={{ fontWeight: 600 }}>{inst.name}</td>
+                  <td>{inst.location || '—'}</td>
+                  <td>{getAdminDisplay(inst)}</td>
                   <td>
-                    <span className={`${sectionStyles.statusBadge} ${sectionStyles[school.status.toLowerCase()]}`}>
-                      {school.status}
+                    <span className={`${sectionStyles.statusBadge} ${sectionStyles[inst.status?.toLowerCase() || 'active']}`}>
+                      {inst.status || 'Active'}
                     </span>
                   </td>
-                  <td>{school.plan}</td>
+                  <td>{inst.plan || '—'}</td>
                   <td>
-                    <button className={sectionStyles.tableActionBtn} title="Edit Institution">
+                    <button
+                      className={sectionStyles.tableActionBtn}
+                      title="Edit Institution"
+                      onClick={() => setEditInstitution(inst)}
+                    >
                       <Edit3 size={16} />
                     </button>
                   </td>
                 </tr>
               ))}
+              {!isLoading && filtered.length === 0 && (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>
+                    {searchQuery ? 'No institutions match your search.' : 'No institutions yet. Click "Add Institution" to get started!'}
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Register New Institution"
-      >
-        <form className="erp-form" onSubmit={handleAddInstitution}>
-          <div className="erp-form-group">
-            <label>Institution Name</label>
-            <input
-              className="erp-input"
-              type="text"
-              placeholder="e.g. Harvard University"
-              required
-              value={newInstitution.name}
-              onChange={(e) => setNewInstitution({...newInstitution, name: e.target.value})}
-            />
-          </div>
+      <AddInstitutionModal
+        isOpen={isAddOpen}
+        onClose={() => setIsAddOpen(false)}
+        onSuccess={() => { setIsAddOpen(false); fetchInstitutions(); }}
+      />
 
-          <div className="erp-form-row">
-            <div className="erp-form-group">
-              <label>Location (City)</label>
-              <input
-                className="erp-input"
-                type="text"
-                placeholder="e.g. New York"
-                required
-                value={newInstitution.location}
-                onChange={(e) => setNewInstitution({...newInstitution, location: e.target.value})}
-              />
-            </div>
-            <div className="erp-form-group">
-              <label>Admin Contact Email</label>
-              <input
-                className="erp-input"
-                type="email"
-                placeholder="admin@school.com"
-                required
-                value={newInstitution.contact}
-                onChange={(e) => setNewInstitution({...newInstitution, contact: e.target.value})}
-              />
-            </div>
-          </div>
-
-          <div className="erp-form-row">
-            <div className="erp-form-group" style={{flex: 1}}>
-              <label>License Plan</label>
-              <select
-                className="erp-select"
-                value={newInstitution.plan}
-                onChange={(e) => setNewInstitution({...newInstitution, plan: e.target.value})}
-              >
-                <option value="Basic">Basic</option>
-                <option value="Standard">Standard</option>
-                <option value="Premium AI">Premium AI</option>
-                <option value="Enterprise">Enterprise</option>
-              </select>
-            </div>
-            <div className="erp-form-group" style={{flex: 1}}>
-              <label>Account Status</label>
-              <select
-                className="erp-select"
-                value={newInstitution.status}
-                onChange={(e) => setNewInstitution({...newInstitution, status: e.target.value})}
-              >
-                <option value="Active">Active</option>
-                <option value="Expiring">Expiring</option>
-                <option value="Onboarding">Onboarding</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="erp-form-actions">
-            <button type="button" className="erp-btn-cancel" onClick={() => setIsModalOpen(false)}>
-              Cancel
-            </button>
-            <button type="submit" className="erp-btn-submit">
-              Save Institution
-            </button>
-          </div>
-        </form>
-      </Modal>
+      <EditInstitutionModal
+        institution={editInstitution}
+        isOpen={!!editInstitution}
+        onClose={() => setEditInstitution(null)}
+        onSuccess={() => { setEditInstitution(null); fetchInstitutions(); }}
+      />
     </div>
   );
 }
