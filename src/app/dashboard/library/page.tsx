@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import PageHeader from '../../components/PageHeader';
 import Modal from '../components/Modal';
 import styles from './page.module.css';
-import { Plus, Book, User, Hash } from 'lucide-react';
+import { Plus, Book, User, Hash, AlertCircle } from 'lucide-react';
 
 const INITIAL_BOOKS = [
   { id: 1, title: 'Clean Code', student: 'Alex Johnson', issue: 'Oct 15, 2026', due: 'Oct 22, 2026', status: 'Returned' },
@@ -73,42 +73,18 @@ export default function LibraryPage() {
       </section>
 
       <section className={`${styles.tableCard} card-shadow`}>
-        <h2 className={styles.tableTitle}>Recent Activity & Catalog</h2>
-
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Book Title</th>
-              <th>Student Name</th>
-              <th>Issue Date</th>
-              <th>Due Date</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bookList.map((book) => (
-              <tr key={book.id}>
-                <td style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{book.title}</td>
-                <td>{book.student}</td>
-                <td>{book.issue}</td>
-                <td>{book.due}</td>
-                <td>
-                  <span
-                    className={`${styles.badge} ${
-                      book.status === 'Returned'
-                        ? styles.badgeReturned
-                        : book.status === 'Issued'
-                        ? styles.badgeIssued
-                        : styles.badgeOverdue
-                    }`}
-                  >
-                    {book.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className={styles.comingSoonContainer}>
+          <div className={styles.comingSoonIcon}>
+            <AlertCircle size={64} color="#f59e0b" />
+          </div>
+          <h2>Library Management System Coming Soon</h2>
+          <p>We are currently migrating the library database to our dynamic session-based architecture. Real-time book tracking, digital issuing, and automated overdue notifications will be enabled in the next update.</p>
+          <div className={styles.comingSoonAction}>
+            <span className={styles.maintenanceBadge}>
+              System Under Maintenance
+            </span>
+          </div>
+        </div>
       </section>
 
       <Modal

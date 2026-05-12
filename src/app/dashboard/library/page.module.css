@@ -95,14 +95,52 @@
 }
 
 .table td:first-child, .table th:first-child { padding-left: 0.5rem; font-weight: 600; color: var(--text-primary); }
-.table td:last-child { padding-right: 0.5rem; }
 
-.table tbody tr {
-  transition: background-color 0.2s ease;
+.comingSoonContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 2rem;
+  text-align: center;
 }
 
-.table tbody tr:hover td {
-  background-color: #fafbfc;
+.comingSoonIcon {
+  margin-bottom: 2rem;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.comingSoonContainer h2 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 1rem;
+}
+
+.comingSoonContainer p {
+  max-width: 600px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  font-size: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.maintenanceBadge {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 0.6rem 1.5rem;
+  border-radius: 50px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 10px rgba(245, 158, 11, 0.15);
 }
 
 .badge {
