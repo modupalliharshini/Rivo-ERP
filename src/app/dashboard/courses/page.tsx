@@ -12,6 +12,7 @@ export default function CoursesPage() {
   const [selectedGrade, setSelectedGrade] = useState('Playgroup');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
+  const [courses, setCourses] = useState<any[]>([]);
   const [newCourse, setNewCourse] = useState({
     title: '',
     tag: 'Degree',
@@ -88,7 +89,7 @@ export default function CoursesPage() {
           if (subject.toLowerCase().includes('draw') || subject.toLowerCase().includes('color')) { Icon = Globe; colorClass = styles.iconWrapperYellow; }
 
           return (
-            <div key={index} className={`${styles.courseCard} card-shadow`}>
+            <div key={`dynamic-${index}`} className={`${styles.courseCard} card-shadow`}>
               <div className={styles.iconContainer}>
                 <div className={`${styles.iconWrapper} ${colorClass}`}>
                   <Icon size={24} />
@@ -109,6 +110,28 @@ export default function CoursesPage() {
             </div>
           );
         })}
+
+        {courses.map((course) => (
+          <div key={`manual-${course.id}`} className={`${styles.courseCard} card-shadow`}>
+            <div className={styles.iconContainer}>
+              <div className={`${styles.iconWrapper} ${course.colorClass}`}>
+                <course.icon size={24} />
+              </div>
+            </div>
+            <h3 className={styles.courseTitle}>{course.title}</h3>
+            <p className={styles.courseSub}>{course.sub}</p>
+            
+            <div className={styles.cardFooter}>
+              <span className={styles.pillGray}>{course.tag}</span>
+              <button 
+                className={styles.manageBtn} 
+                onClick={() => setIsComingSoonOpen(true)}
+              >
+                Manage <ArrowRight size={16} />
+              </button>
+            </div>
+          </div>
+        ))}
       </section>
 
       <section className={styles.graphSection}>

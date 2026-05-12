@@ -61,7 +61,7 @@ export default function AdminAttendancePage() {
       head: [['Student Name', 'Email / ID', 'Status']],
       body: tableData,
       theme: 'grid',
-      headStyles: { fillStyle: '#1d4ed8' }
+      headStyles: { fillColor: '#1d4ed8' }
     });
 
     doc.save(`Attendance_${slotRecord.grade}_${slotRecord.subject}_${date}.pdf`);
