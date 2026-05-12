@@ -3,6 +3,7 @@
 import React from 'react';
 import PageHeader from '../../components/PageHeader';
 import styles from './page.module.css';
+import { AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function HostelPage() {
@@ -13,29 +14,17 @@ export default function HostelPage() {
         titleHighlight="Mess" 
       />
 
-      <div className={styles.cardsLayout}>
-        <section className={styles.card}>
-          <h2 className={styles.cardTitle}>My Room Details</h2>
-          <p className={styles.cardSubtext}>Block A | Room 201</p>
-          <hr className={styles.divider} />
-          <div className={styles.fieldRow}>
-            <span className={styles.fieldLabel}>Roommate:</span>
-            <span className={styles.fieldValue}>Kevin Peterson</span>
-          </div>
-        </section>
-
-        <section className={styles.card}>
-          <h2 className={styles.cardTitle}>Today&apos;s Mess Menu</h2>
-          <div className={styles.cardSubtext} style={{ opacity: 0 }}>Spacer</div>
-          <div className={styles.menuItemRow}>
-            <span className={styles.menuLabel}>Breakfast:</span>
-            <span className={styles.menuValue}>Puri & Bhaji</span>
-          </div>
-          <div className={styles.menuItemRow}>
-            <span className={styles.menuLabel}>Lunch:</span>
-            <span className={styles.menuValue}>Rice, Dal & Paneer</span>
-          </div>
-        </section>
+      <div className={styles.comingSoonContainer}>
+        <div className={styles.comingSoonIcon}>
+          <AlertCircle size={64} color="#f59e0b" />
+        </div>
+        <h2>Hostel & Mess Portal Coming Soon</h2>
+        <p>Your digital campus residence portal is being upgraded. Soon you will be able to check live mess menus, submit room maintenance requests, and communicate with your block warden directly from this dashboard.</p>
+        <div className={styles.comingSoonAction}>
+          <span className={styles.maintenanceBadge}>
+            Migration in Progress
+          </span>
+        </div>
       </div>
 
       <div className={styles.backLinkContainer}>
