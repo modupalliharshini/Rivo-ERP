@@ -1,110 +1,161 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createClient } from '@/utils/supabase/client';
 import PageHeader from '../../components/PageHeader';
 import Modal from '../components/Modal';
 import styles from './page.module.css';
-import { Plus } from 'lucide-react';
+import { Plus, Loader2, Calendar as CalendarIcon, Trash2, Edit2, ChevronRight, FileText } from 'lucide-react';
+import Link from 'next/link';
 
-const INITIAL_EXAMS = [
-  { id: 1, name: 'Unit Test 2', subject: 'Mathematics', date: 'Oct 30, 2026', status: 'Upcoming', actionText: 'Edit' },
-  { id: 2, name: 'Mid-Term Finals', subject: 'Physics', date: 'Oct 20, 2026', status: 'Grading', actionText: 'View' },
-  { id: 3, name: 'Term 1 Assessment', subject: 'Chemistry', date: 'Mar 15, 2026', status: 'Completed', actionText: 'Report' },
-];
+const GRADES = ['Playgroup', 'Nursery', 'Pre-Primary 1', 'Pre-Primary 2'];
 
-export default function ExamsPage() {
-  const [exams, setExams] = useState(INITIAL_EXAMS);
+export default function AdminExamsPage() {
+  const [exams, setExams] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [newExam, setNewExam] = useState({
     name: '',
-    subject: 'Mathematics',
-    date: '',
-    status: 'Upcoming'
+    grade: GRADES[0],
+    date: new Date().toISOString().split('T')[0],
+    status: 'Upcoming',
+    description: ''
   });
 
-  const upcomingCount = exams.filter(e => e.status === 'Upcoming').length;
+  const supabase = createClient();
 
-  const handleCreateExam = (e: React.FormEvent) => {
+  const fetchExams = async () => {
+    setIsLoading(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: profile } = await supabase.from('profiles').select('institution_id').eq('id', user.id).single();
+    if (!profile) return;
+
+    const { data, error } = await supabase
+      .from('exams')
+      .select('*')
+      .eq('institution_id', profile.institution_id)
+      .order('date', { ascending: false });
+
+    if (data) setExams(data);
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    fetchExams();
+  }, []);
+
+  const handleCreateExam = async (e: React.FormEvent) => {
     e.preventDefault();
-    const exam = {
-      ...newExam,
-      id: exams.length + 1,
-      date: new Date(newExam.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      actionText: 'Edit'
-    };
-    setExams([exam, ...exams]);
-    setIsModalOpen(false);
-    setNewExam({ name: '', subject: 'Mathematics', date: '', status: 'Upcoming' });
+    setIsSubmitting(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: profile } = await supabase.from('profiles').select('institution_id').eq('id', user?.id).single();
+
+    const { error } = await supabase
+      .from('exams')
+      .insert({
+        ...newExam,
+        institution_id: profile?.institution_id
+      });
+
+    if (error) {
+      alert('Failed to create exam');
+    } else {
+      setIsModalOpen(false);
+      setNewExam({ name: '', grade: GRADES[0], date: new Date().toISOString().split('T')[0], status: 'Upcoming', description: '' });
+      fetchExams();
+    }
+    setIsSubmitting(false);
+  };
+
+  const deleteExam = async (id: string) => {
+    if (!confirm('Are you sure? This will also delete all results for this exam.')) return;
+    const { error } = await supabase.from('exams').delete().eq('id', id);
+    if (error) alert('Failed to delete');
+    else fetchExams();
+  };
+
+  const updateStatus = async (id: string, status: string) => {
+    const { error } = await supabase.from('exams').update({ status }).eq('id', id);
+    if (error) alert('Failed to update status');
+    else fetchExams();
   };
 
   return (
     <div className={styles.container}>
       <PageHeader
         titleStart="Exam"
-        titleHighlight="Section"
+        titleHighlight="Management"
         actionElement={
-          <button className="btn-info" onClick={() => setIsModalOpen(true)}>
-            <Plus size={18} /> Create New Exam
+          <button className="btn-primary" onClick={() => setIsModalOpen(true)}>
+            <Plus size={18} /> Schedule New Exam
           </button>
         }
       />
 
       <section className={styles.statsGrid}>
         <div className={styles.statCard}>
-          <div className={styles.statTitle}>Upcoming Exams</div>
-          <div className={styles.statValue}>{upcomingCount}</div>
-          <div className={`${styles.statSub} ${styles.subBlue}`}>
-            {upcomingCount > 0 ? `Next: ${exams.find(e => e.status === 'Upcoming')?.name}` : 'No upcoming exams'}
-          </div>
+          <div className={styles.statTitle}>Upcoming</div>
+          <div className={styles.statValue}>{exams.filter(e => e.status === 'Upcoming').length}</div>
+          <div className={styles.statSub}>Ready to conduct</div>
         </div>
         <div className={styles.statCard}>
-          <div className={styles.statTitle}>Results Pending</div>
-          <div className={styles.statValue}>12</div>
-          <div className={`${styles.statSub} ${styles.subYellow}`}>Grading in progress</div>
+          <div className={styles.statTitle}>Grading</div>
+          <div className={styles.statValue}>{exams.filter(e => e.status === 'Grading').length}</div>
+          <div className={styles.statSub}>Processing results</div>
         </div>
         <div className={styles.statCard}>
-          <div className={styles.statTitle}>Avg. Pass Rate</div>
-          <div className={styles.statValue}>88%</div>
-          <div className={`${styles.statSub} ${styles.subGreen}`}>+2% from last term</div>
+          <div className={styles.statTitle}>Completed</div>
+          <div className={styles.statValue}>{exams.filter(e => e.status === 'Completed').length}</div>
+          <div className={styles.statSub}>History archived</div>
         </div>
       </section>
 
-      <section className={`${styles.tableCard} card-shadow`}>
-        <h2 className={styles.tableTitle}>Recent & Upcoming Exams</h2>
+      <section className={styles.tableCard}>
+        <div className={styles.tableHeader}>
+          <h2 className={styles.tableTitle}>Academic Assessments</h2>
+        </div>
 
         <table className={styles.table}>
           <thead>
             <tr>
               <th>Exam Name</th>
-              <th>Subject</th>
+              <th>Grade</th>
               <th>Date</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {exams.map((exam) => (
+            {isLoading ? (
+              <tr><td colSpan={5} style={{ textAlign: 'center', padding: '2rem' }}><Loader2 className="spin" /> Loading...</td></tr>
+            ) : exams.length === 0 ? (
+              <tr><td colSpan={5} style={{ textAlign: 'center', padding: '2rem' }}>No exams scheduled yet.</td></tr>
+            ) : exams.map((exam) => (
               <tr key={exam.id}>
-                <td style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{exam.name}</td>
-                <td>{exam.subject}</td>
-                <td>{exam.date}</td>
+                <td className={styles.examName}>{exam.name}</td>
+                <td className={styles.gradeCell}>{exam.grade}</td>
+                <td>{new Date(exam.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
                 <td>
-                  <span
-                    className={`${styles.badge} ${
-                      exam.status === 'Upcoming'
-                        ? styles.badgeUpcoming
-                        : exam.status === 'Grading'
-                        ? styles.badgeGrading
-                        : styles.badgeCompleted
-                    }`}
+                  <select 
+                    className={`${styles.statusSelect} ${styles[`status${exam.status}`]}`}
+                    value={exam.status}
+                    onChange={(e) => updateStatus(exam.id, e.target.value)}
                   >
-                    {exam.status}
-                  </span>
+                    <option value="Upcoming">Upcoming</option>
+                    <option value="Grading">Grading</option>
+                    <option value="Completed">Completed</option>
+                  </select>
                 </td>
                 <td>
-                  <a href="#" className={styles.actionLink}>
-                    {exam.actionText}
-                  </a>
+                  <div className={styles.actionGroup}>
+                    <Link href={`/dashboard/exams/${exam.id}`} className={styles.editBtn}>
+                      <FileText size={14} /> Mark Entry
+                    </Link>
+                    <button className={styles.deleteBtn} onClick={() => deleteExam(exam.id)}><Trash2 size={14} /></button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -115,15 +166,14 @@ export default function ExamsPage() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Schedule New Exam"
+        title="Schedule Assessment"
       >
         <form className="erp-form" onSubmit={handleCreateExam}>
           <div className="erp-form-group">
-            <label>Exam Title</label>
+            <label>Exam Name (e.g. Unit Test 1, Annual Exam)</label>
             <input
               className="erp-input"
               type="text"
-              placeholder="e.g. Unit Test 3"
               required
               value={newExam.name}
               onChange={(e) => setNewExam({...newExam, name: e.target.value})}
@@ -132,18 +182,13 @@ export default function ExamsPage() {
 
           <div className="erp-form-row">
             <div className="erp-form-group">
-              <label>Subject</label>
+              <label>Target Grade</label>
               <select
                 className="erp-select"
-                value={newExam.subject}
-                onChange={(e) => setNewExam({...newExam, subject: e.target.value})}
+                value={newExam.grade}
+                onChange={(e) => setNewExam({...newExam, grade: e.target.value})}
               >
-                <option value="Mathematics">Mathematics</option>
-                <option value="Physics">Physics</option>
-                <option value="Chemistry">Chemistry</option>
-                <option value="Biology">Biology</option>
-                <option value="English">English</option>
-                <option value="History">History</option>
+                {GRADES.map(g => <option key={g} value={g}>{g}</option>)}
               </select>
             </div>
             <div className="erp-form-group">
@@ -159,24 +204,19 @@ export default function ExamsPage() {
           </div>
 
           <div className="erp-form-group">
-            <label>Initial Status</label>
-            <select
-              className="erp-select"
-              value={newExam.status}
-              onChange={(e) => setNewExam({...newExam, status: e.target.value})}
-            >
-              <option value="Upcoming">Upcoming</option>
-              <option value="Grading">Grading</option>
-              <option value="Completed">Completed</option>
-            </select>
+            <label>Description (Optional)</label>
+            <textarea
+              className="erp-input"
+              rows={3}
+              value={newExam.description}
+              onChange={(e) => setNewExam({...newExam, description: e.target.value})}
+            />
           </div>
 
           <div className="erp-form-actions">
-            <button type="button" className="erp-btn-cancel" onClick={() => setIsModalOpen(false)}>
-              Cancel
-            </button>
-            <button type="submit" className="erp-btn-submit">
-              Publish Exam
+            <button type="button" className="erp-btn-cancel" onClick={() => setIsModalOpen(false)}>Cancel</button>
+            <button type="submit" className="erp-btn-submit" disabled={isSubmitting}>
+              {isSubmitting ? <Loader2 className="spin" size={18} /> : 'Publish Exam'}
             </button>
           </div>
         </form>

@@ -1,141 +1,140 @@
 .container {
-  display: flex;
-  flex-direction: column;
+  padding: 2rem;
+  min-height: 100vh;
+  background-color: #f8fafc;
 }
 
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
-  margin-bottom: 2.5rem;
+  margin: 2rem 0;
 }
 
 .statCard {
-  background-color: var(--card-bg);
-  border-radius: var(--radius-lg);
+  background: white;
   padding: 1.5rem;
-  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  animation: fadeUp 0.5s ease-out forwards;
-  opacity: 0;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
-.statCard:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-}
-
-.statCard:nth-child(1) { animation-delay: 0.1s; }
-.statCard:nth-child(2) { animation-delay: 0.2s; }
-.statCard:nth-child(3) { animation-delay: 0.3s; }
 
 .statTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
   color: var(--text-secondary);
-  font-size: 0.95rem;
-  font-weight: 500;
 }
 
 .statValue {
-  color: var(--text-primary);
-  font-size: 2.25rem;
-  font-weight: 600;
-  line-height: 1.1;
-  letter-spacing: -0.5px;
-  margin-bottom: 0.2rem;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--text-main);
 }
 
 .statSub {
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  width: fit-content;
 }
 
-.subBlue { color: #3b82f6; }
-.subYellow { color: var(--color-pending-text); }
-.subGreen { color: var(--color-success-text); }
-
 .tableCard {
-  background-color: var(--card-bg);
-  border-radius: var(--radius-lg);
-  padding: 2rem;
-  border: 1px solid var(--border-color);
-  animation: fadeUp 0.5s ease-out forwards;
-  animation-delay: 0.4s;
-  opacity: 0;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  overflow: hidden;
+  margin-top: 2rem;
+}
+
+.tableHeader {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .tableTitle {
-  font-size: 1.15rem;
-  font-weight: 500;
-  color: var(--text-primary);
-  margin-bottom: 1.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  text-align: left;
 }
 
 .table th {
-  padding-bottom: 1rem;
+  text-align: left;
+  padding: 1.25rem 2rem;
+  background: #f8fafc;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
   font-weight: 600;
-  font-size: 0.95rem;
-  color: var(--text-primary);
-  border-bottom: 1px solid var(--border-color);
 }
 
 .table td {
-  padding: 1rem 0;
-  font-size: 0.95rem;
-  color: var(--text-secondary);
+  padding: 1.5rem 2rem;
   border-bottom: 1px solid #f1f5f9;
+  color: var(--text-main);
 }
 
-.table td:first-child, .table th:first-child { padding-left: 0.5rem; font-weight: 600; color: var(--text-primary); }
-.table td:last-child { padding-right: 0.5rem; }
-
-.table tbody tr {
-  transition: background-color 0.2s ease;
+.examName {
+  font-weight: 700;
+  color: var(--primary-color);
 }
 
-.table tbody tr:hover td {
-  background-color: #fafbfc;
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.8rem;
+.gradeCell {
   font-weight: 600;
+  color: var(--text-secondary);
 }
 
-.badgeUpcoming { background-color: #dbeafe; color: #1d4ed8; }
-.badgeGrading { background-color: var(--color-pending-bg); color: var(--color-pending-text); }
-.badgeCompleted { background-color: var(--color-success-bg); color: var(--color-success-text); }
-
-.actionLink {
-  color: #3b82f6;
-  font-weight: 500;
-  text-decoration: none;
+.statusSelect {
+  padding: 0.4rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 1px solid transparent;
   cursor: pointer;
-  transition: color 0.2s ease;
 }
 
-.actionLink:hover {
-  color: #1d4ed8;
-  text-decoration: underline;
+.statusUpcoming { background: #eff6ff; color: #1d4ed8; }
+.statusGrading { background: #fffbeb; color: #d97706; }
+.statusCompleted { background: #ecfdf5; color: #059669; }
+
+.actionGroup {
+  display: flex;
+  gap: 0.75rem;
 }
 
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+.editBtn, .deleteBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
 }
+
+.editBtn {
+  background: #f1f5f9;
+  color: var(--text-main);
+}
+
+.deleteBtn {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.editBtn:hover { background: #e2e8f0; }
+.deleteBtn:hover { background: #fecaca; }
 
 @media (max-width: 768px) {
-  .table { display: block; overflow-x: auto; white-space: nowrap; }
+  .statsGrid { grid-template-columns: 1fr; }
+  .table { display: block; overflow-x: auto; }
 }
