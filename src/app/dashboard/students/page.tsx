@@ -255,7 +255,21 @@ export default function StudentsPage() {
             <div className="erp-form-group"><label>Password</label><input className="erp-input" type="password" required minLength={6} autoComplete="new-password" value={newStudent.password} onChange={(e) => setNewStudent({...newStudent, password: e.target.value})} /></div>
           </div>
           <div className="erp-form-row">
-            <div className="erp-form-group"><label>Grade / Class</label><input className="erp-input" type="text" required value={newStudent.grade} onChange={(e) => setNewStudent({...newStudent, grade: e.target.value})} /></div>
+            <div className="erp-form-group">
+              <label>Grade / Class</label>
+              <select 
+                className="erp-select" 
+                required 
+                value={newStudent.grade} 
+                onChange={(e) => setNewStudent({...newStudent, grade: e.target.value})}
+              >
+                <option value="">Select Grade</option>
+                <option value="Playgroup">Playgroup</option>
+                <option value="Nursery">Nursery</option>
+                <option value="Pre-Primary 1">Pre-Primary 1</option>
+                <option value="Pre-Primary 2">Pre-Primary 2</option>
+              </select>
+            </div>
             <div className="erp-form-group"><label>Section</label><input className="erp-input" type="text" required value={newStudent.section} onChange={(e) => setNewStudent({...newStudent, section: e.target.value})} /></div>
           </div>
           <div className="erp-form-group"><label>Parent Phone</label><input className="erp-input" type="tel" required value={newStudent.phone} onChange={(e) => setNewStudent({...newStudent, phone: e.target.value})} /></div>
@@ -276,7 +290,21 @@ export default function StudentsPage() {
               <div className="erp-form-group"><label>Last Name</label><input className="erp-input" type="text" value={editStudent.last_name} onChange={(e) => setEditStudent({...editStudent, last_name: e.target.value})} /></div>
             </div>
             <div className="erp-form-row">
-              <div className="erp-form-group"><label>Grade / Class</label><input className="erp-input" type="text" required value={editStudent.grade} onChange={(e) => setEditStudent({...editStudent, grade: e.target.value})} /></div>
+              <div className="erp-form-group">
+                <label>Grade / Class</label>
+                <select 
+                  className="erp-select" 
+                  required 
+                  value={editStudent.grade} 
+                  onChange={(e) => setEditStudent({...editStudent, grade: e.target.value})}
+                >
+                  <option value="">Select Grade</option>
+                  <option value="Playgroup">Playgroup</option>
+                  <option value="Nursery">Nursery</option>
+                  <option value="Pre-Primary 1">Pre-Primary 1</option>
+                  <option value="Pre-Primary 2">Pre-Primary 2</option>
+                </select>
+              </div>
               <div className="erp-form-group"><label>Section</label><input className="erp-input" type="text" required value={editStudent.section} onChange={(e) => setEditStudent({...editStudent, section: e.target.value})} /></div>
             </div>
             <div className="erp-form-group"><label>Parent Phone</label><input className="erp-input" type="tel" required value={editStudent.phone} onChange={(e) => setEditStudent({...editStudent, phone: e.target.value})} /></div>
