@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import PageHeader from '../../components/PageHeader';
 import Modal from '../components/Modal';
 import styles from './page.module.css';
-import { Plus, Truck, User, Users } from 'lucide-react';
+import { Plus, Truck, User, Users, AlertCircle } from 'lucide-react';
 
 const INITIAL_ROUTES = [
   { id: 1, route: 'Madhapur - HI-TECH City', bus: 'Bus #01', driver: 'Ravi Kumar', students: 45, status: 'On Route' },
@@ -54,63 +54,19 @@ export default function TransportPage() {
         }
       />
 
-      <section className={styles.statsGrid}>
-        <div className={styles.statCard}>
-          <p className={styles.statTitle}>Total Vehicles</p>
-          <div className={styles.statValue}>{totalBuses}</div>
-          <p className={`${styles.statSub} ${styles.subGreen}`}>All Active</p>
-        </div>
-        <div className={styles.statCard}>
-          <p className={styles.statTitle}>Total Students</p>
-          <div className={styles.statValue}>{totalBusStudents}</div>
-          <p className={`${styles.statSub} ${styles.subBlue}`}>Covering 15km radius</p>
-        </div>
-        <div className={styles.statCard}>
-          <p className={styles.statTitle}>Next Maintenance</p>
-          <div className={styles.statValue}>Bus #04</div>
-          <p className={`${styles.statSub} ${styles.subYellow}`}>In 3 days</p>
-        </div>
-      </section>
-
       <section className={`${styles.tableCard} card-shadow`}>
-        <div className={styles.tableHeader}>
-          <h2 className={styles.tableTitle}>Route Status</h2>
-          <button className={styles.trackBtn}>Track All Live</button>
+        <div className={styles.comingSoonContainer}>
+          <div className={styles.comingSoonIcon}>
+            <AlertCircle size={64} color="#f59e0b" />
+          </div>
+          <h2>Transport Management System Coming Soon</h2>
+          <p>We are currently integrating live GPS tracking and automated route optimization. Soon you will be able to monitor vehicle health, track bus locations in real-time, and manage student pick-up/drop-off schedules dynamically.</p>
+          <div className={styles.comingSoonAction}>
+            <span className={styles.maintenanceBadge}>
+              System Under Upgrade
+            </span>
+          </div>
         </div>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Route Name</th>
-              <th>Bus No.</th>
-              <th>Driver Name</th>
-              <th>Students</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {routeList.map((route) => (
-              <tr key={route.id}>
-                <td>{route.route}</td>
-                <td>{route.bus}</td>
-                <td>{route.driver}</td>
-                <td>{route.students}</td>
-                <td>
-                  <span
-                    className={`${styles.badge} ${
-                      route.status === 'On Route'
-                        ? styles.badgeOnRoute
-                        : route.status === 'Delayed'
-                        ? styles.badgeDelayed
-                        : styles.badgeAtSchool
-                    }`}
-                  >
-                    {route.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </section>
 
       <Modal
