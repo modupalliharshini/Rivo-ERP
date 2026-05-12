@@ -157,8 +157,12 @@ export default function TimeTablePage() {
                     <div className={styles.slotHeader}>
                       <span className={styles.time}><Clock size={14} /> {slot.start_time.substring(0, 5)} - {slot.end_time.substring(0, 5)}</span>
                       <div className={styles.slotActions}>
-                        <button onClick={() => openEditModal(slot)}><Edit2 size={14} /></button>
-                        <button onClick={() => handleDelete(slot.id)} className={styles.deleteBtn}><Trash2 size={14} /></button>
+                        <button type="button" onClick={(e) => { e.stopPropagation(); console.log('Edit clicked', slot); openEditModal(slot); }}>
+                          <Edit2 size={14} />
+                        </button>
+                        <button type="button" onClick={(e) => { e.stopPropagation(); handleDelete(slot.id); }} className={styles.deleteBtn}>
+                          <Trash2 size={14} />
+                        </button>
                       </div>
                     </div>
                     <h4 className={styles.subject}>{slot.subject}</h4>
