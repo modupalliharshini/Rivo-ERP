@@ -29,7 +29,7 @@ export default function LeaveApplicationPage() {
     // Fetch Profile for Balances
     const { data: profileData } = await supabase
       .from('profiles')
-      .select('sick_leave_balance, casual_leave_balance, earned_leave_balance')
+      .select('institution_id, sick_leave_balance, casual_leave_balance, earned_leave_balance')
       .eq('id', user.id)
       .single();
     
@@ -52,26 +52,35 @@ export default function LeaveApplicationPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!profile) {
+      alert('Profile data not loaded. Please refresh.');
+      return;
+    }
     setIsSubmitting(true);
     
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      const { data: profile } = await supabase.from('profiles').select('institution_id').eq('id', user?.id).single();
+      if (!user) throw new Error('You must be logged in');
 
       const { error } = await supabase.from('leaves').insert({
-        faculty_id: user?.id,
-        institution_id: profile?.institution_id,
+        faculty_id: user.id,
+        institution_id: profile.institution_id,
         type: leaveData.type,
         start_date: leaveData.startDate,
         end_date: leaveData.endDate,
         reason: leaveData.reason
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Leave insertion error:', error);
+        throw error;
+      }
+      
       setSubmitted(true);
-      fetchLeaves();
-    } catch (err) {
-      alert('Failed to submit application');
+      fetchData();
+    } catch (err: any) {
+      console.error('Leave submission caught error:', err);
+      alert(`Failed to submit application: ${err.message || 'Unknown error'}`);
     } finally {
       setIsSubmitting(false);
     }

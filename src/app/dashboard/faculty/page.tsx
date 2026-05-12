@@ -82,6 +82,54 @@ export default function FacultyPage() {
 
   const handleLeaveAction = async (id: string, status: 'Approved' | 'Rejected') => {
     try {
+      if (status === 'Approved') {
+        // Fetch leave details first
+        const { data: leave, error: fetchErr } = await supabase
+          .from('leaves')
+          .select('*')
+          .eq('id', id)
+          .single();
+        
+        if (fetchErr) throw fetchErr;
+
+        // Calculate days
+        const start = new Date(leave.start_date);
+        const end = new Date(leave.end_date);
+        const diffTime = Math.abs(end.getTime() - start.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+        // Fetch faculty profile for current balance
+        const { data: profile, error: profErr } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', leave.faculty_id)
+          .single();
+        
+        if (profErr) throw profErr;
+
+        // Determine which balance to decrement
+        const type = leave.type.toLowerCase();
+        let updateData: any = {};
+        
+        if (type.includes('sick')) {
+          updateData.sick_leave_balance = (profile.sick_leave_balance || 0) - diffDays;
+        } else if (type.includes('casual')) {
+          updateData.casual_leave_balance = (profile.casual_leave_balance || 0) - diffDays;
+        } else if (type.includes('earned')) {
+          updateData.earned_leave_balance = (profile.earned_leave_balance || 0) - diffDays;
+        }
+
+        // Update profile balance
+        if (Object.keys(updateData).length > 0) {
+          const { error: updErr } = await supabase
+            .from('profiles')
+            .update(updateData)
+            .eq('id', leave.faculty_id);
+          
+          if (updErr) throw updErr;
+        }
+      }
+
       const { error } = await supabase
         .from('leaves')
         .update({ status })
@@ -89,7 +137,9 @@ export default function FacultyPage() {
 
       if (error) throw error;
       fetchLeaves();
+      fetchFaculty(); // Refresh staff list to show updated balances in modals
     } catch (err) {
+      console.error(err);
       alert('Action failed');
     }
   };
