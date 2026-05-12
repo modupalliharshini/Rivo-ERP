@@ -8,8 +8,9 @@ import {
   Settings,
   ChevronDown
 } from 'lucide-react';
-import styles from '../super-admin/page.module.css';
+import SuperAdminHeaderStyles from '../super-admin/page.module.css';
 import { createClient } from '@/utils/supabase/client';
+import ProfileModal from '../super-admin/components/ProfileModal';
 
 interface SuperAdminHeaderProps {
   title: string;
@@ -19,29 +20,31 @@ interface SuperAdminHeaderProps {
 
 export default function SuperAdminHeader({ title, highlight, actionElement }: SuperAdminHeaderProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [displayName, setDisplayName] = useState('SA Admin');
   const [initials, setInitials] = useState('SA');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
+  const loadProfile = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('first_name, last_name')
+      .eq('id', user.id)
+      .single();
+
+    if (profile?.first_name) {
+      const fullName = `${profile.first_name} ${profile.last_name || ''}`.trim();
+      const computedInitials = `${profile.first_name[0]}${profile.last_name?.[0] || ''}`.toUpperCase();
+      setDisplayName(fullName);
+      setInitials(computedInitials);
+    }
+  };
+
   useEffect(() => {
-    const loadProfile = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('first_name, last_name')
-        .eq('id', user.id)
-        .single();
-
-      if (profile?.first_name) {
-        const fullName = `${profile.first_name} ${profile.last_name || ''}`.trim();
-        const computedInitials = `${profile.first_name[0]}${profile.last_name?.[0] || ''}`.toUpperCase();
-        setDisplayName(fullName);
-        setInitials(computedInitials);
-      }
-    };
     loadProfile();
 
     // Close dropdown when clicking outside
@@ -63,42 +66,48 @@ export default function SuperAdminHeader({ title, highlight, actionElement }: Su
   };
 
   return (
-    <header className={styles.header}>
+    <header className={SuperAdminHeaderStyles.header}>
       <div style={{display: 'flex', alignItems: 'center', gap: '2rem'}}>
-        <h1 className={styles.title}>
-          {title} <span className={styles.titleHighlight}>{highlight}</span>
+        <h1 className={SuperAdminHeaderStyles.title}>
+          {title} <span className={SuperAdminHeaderStyles.titleHighlight}>{highlight}</span>
         </h1>
         {actionElement}
       </div>
       
-      <div className={styles.profileContainer} ref={dropdownRef}>
+      <div className={SuperAdminHeaderStyles.profileContainer} ref={dropdownRef}>
         <button 
-          className={styles.profileTrigger} 
+          className={SuperAdminHeaderStyles.profileTrigger} 
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         >
-          <div className={styles.profileText}>
-            <span className={styles.greeting}>Welcome back,</span>
-            <span className={styles.userName}>{displayName}</span>
+          <div className={SuperAdminHeaderStyles.profileText}>
+            <span className={SuperAdminHeaderStyles.greeting}>Welcome back,</span>
+            <span className={SuperAdminHeaderStyles.userName}>{displayName}</span>
           </div>
-          <div className={styles.avatarWrapper}>
-            <div className={styles.avatar}>{initials}</div>
-            <ChevronDown className={`${styles.chevron} ${isDropdownOpen ? styles.chevronOpen : ''}`} size={16} />
+          <div className={SuperAdminHeaderStyles.avatarWrapper}>
+            <div className={SuperAdminHeaderStyles.avatar}>{initials}</div>
+            <ChevronDown className={`${SuperAdminHeaderStyles.chevron} ${isDropdownOpen ? SuperAdminHeaderStyles.chevronOpen : ''}`} size={16} />
           </div>
         </button>
 
         {isDropdownOpen && (
-          <div className={styles.dropdownMenu}>
-            <button className={styles.dropdownItem}>
+          <div className={SuperAdminHeaderStyles.dropdownMenu}>
+            <button 
+              className={SuperAdminHeaderStyles.dropdownItem} 
+              onClick={() => { setIsProfileOpen(true); setIsDropdownOpen(false); }}
+            >
               <User size={18} />
               <span>My Profile</span>
             </button>
-            <button className={styles.dropdownItem}>
+            <button 
+              className={SuperAdminHeaderStyles.dropdownItem}
+              onClick={() => { setIsProfileOpen(true); setIsDropdownOpen(false); }}
+            >
               <Settings size={18} />
               <span>Account Settings</span>
             </button>
-            <div className={styles.dropdownDivider}></div>
+            <div className={SuperAdminHeaderStyles.dropdownDivider}></div>
             <button 
-              className={`${styles.dropdownItem} ${styles.logoutItem}`} 
+              className={`${SuperAdminHeaderStyles.dropdownItem} ${SuperAdminHeaderStyles.logoutItem}`} 
               onClick={handleLogout}
             >
               <LogOut size={18} />
@@ -107,6 +116,12 @@ export default function SuperAdminHeader({ title, highlight, actionElement }: Su
           </div>
         )}
       </div>
+
+      <ProfileModal 
+        isOpen={isProfileOpen} 
+        onClose={() => setIsProfileOpen(false)} 
+        onProfileUpdate={() => loadProfile()}
+      />
     </header>
   );
 }
