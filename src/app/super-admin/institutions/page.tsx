@@ -69,7 +69,7 @@ export default function InstitutionsManagement() {
     <button
       className={sectionStyles.btnPost}
       onClick={() => setIsAddOpen(true)}
-      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#3b82f6', color: 'white', padding: '0.7rem 1.2rem', borderRadius: '10px', fontWeight: '600', border: 'none', cursor: 'pointer' }}
+      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--primary-color)', color: 'white', padding: '0.7rem 1.2rem', borderRadius: '10px', fontWeight: '600', border: 'none', cursor: 'pointer' }}
     >
       <Plus size={20} /> Add Institution
     </button>

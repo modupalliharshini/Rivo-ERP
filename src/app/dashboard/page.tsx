@@ -63,7 +63,7 @@ export default function AdminDashboardPage() {
             <button className="btn-primary" onClick={() => window.location.href='/dashboard/students'}>
               + Add Student
             </button>
-            <button className="btn-primary" style={{ background: '#6366f1' }} onClick={() => window.location.href='/dashboard/faculty'}>
+            <button className="btn-primary" onClick={() => window.location.href='/dashboard/faculty'}>
               + Hire Faculty
             </button>
           </div>

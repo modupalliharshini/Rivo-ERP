@@ -136,7 +136,7 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background-color: #3b82f6; /* crisp blue */
+  background-color: var(--primary-color);
   color: #fff;
   border: none;
   padding: 0.6rem 1.25rem;
@@ -150,7 +150,7 @@ a {
 }
 
 .btn-info:hover {
-  background-color: #2563eb; /* deeper blue */
+  background-color: var(--primary-hover);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
@@ -192,7 +192,7 @@ a {
 .erp-input:focus, .erp-select:focus {
   border-color: var(--text-highlight);
   background-color: white;
-  box-shadow: 0 0 0 3px rgba(169, 18, 32, 0.1);
+  box-shadow: 0 0 0 3px var(--primary-light);
 }
 
 .erp-form-row {
@@ -236,7 +236,7 @@ a {
 }
 
 .erp-btn-submit:hover {
-  background: #900f1c;
+  background: var(--primary-hover);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }

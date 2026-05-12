@@ -29,14 +29,22 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     };
 
     const fetchTheme = async () => {
-      const { data } = await supabase
-        .from('system_settings')
-        .select('theme_color')
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('system_settings')
+          .select('theme_color')
+          .order('updated_at', { ascending: false })
+          .limit(1);
 
-      if (data?.theme_color) {
-        setThemeColor(data.theme_color);
-        applyTheme(data.theme_color);
+        if (error) throw error;
+
+        if (data && data.length > 0 && data[0].theme_color) {
+          const color = data[0].theme_color;
+          setThemeColor(color);
+          applyTheme(color);
+        }
+      } catch (err) {
+        // Fallback or silent fail
       }
     };
 
