@@ -9,6 +9,30 @@ import styles from './page.module.css';
 const GRADES = ['Playgroup', 'Nursery', 'Pre-Primary 1', 'Pre-Primary 2'];
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
+const SUBJECTS_BY_GRADE: Record<string, string[]> = {
+  'Playgroup': [
+    'Literacy Book Team 1', 'Literacy Book Team 2', 'Picture Dictionary', 
+    'Environmental Science', 'Rhymes', 'Premath Skills Team 1', 'Premath Skills Team 2'
+  ],
+  'Nursery': [
+    'Math Concepts & Writing Team 1', 'Math Concepts & Writing Team 2', 'Math Concepts & Writing Team 3',
+    'Environmental Science & Literacy Team 1', 'Environmental Science & Literacy Team 2', 'Environmental Science & Literacy Team 3',
+    'Practice & Activity Sheets', 'Rhymes', 'Drawing & Coloring', 'Patterns Book'
+  ],
+  'Pre-Primary 1': [
+    'Drawing & Colouring', 'Practice & Activity Sheets', 
+    'Math Concepts & Writing Team 1', 'Math Concepts & Writing Team 2', 'Math Concepts & Writing Team 3',
+    'Environmental Science & Literacy Team 1', 'Environmental Science & Literacy Team 2', 'Environmental Science & Literacy Team 3',
+    'Rhymes, Stories & Reading', 'Hindi Concepts & Writing'
+  ],
+  'Pre-Primary 2': [
+    'Rhymes, Stories & Reading', 'Drawing & Colouring', 'Practice & Activity Sheets',
+    'Environmental Science & Literacy Team 1', 'Environmental Science & Literacy Team 2', 'Environmental Science & Literacy Team 3',
+    'Math Concepts & Writing Team 1', 'Math Concepts & Writing Team 2', 'Math Concepts & Writing Team 3',
+    'Hindi Concepts & Writing Team 1', 'Hindi Concepts & Writing Team 2'
+  ]
+};
+
 export default function TimeTablePage() {
   const [activeGrade, setActiveGrade] = useState(GRADES[0]);
   const [timetable, setTimetable] = useState<any[]>([]);
@@ -190,9 +214,19 @@ export default function TimeTablePage() {
                   </select>
                 </div>
                 <div className="erp-form-group">
-                  <label>Subject</label>
-                  <input className="erp-input" type="text" required value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})} placeholder="e.g. Mathematics" />
-                </div>
+              <label>Subject</label>
+              <select 
+                className="erp-select" 
+                required 
+                value={formData.subject} 
+                onChange={e => setFormData({...formData, subject: e.target.value})}
+              >
+                <option value="">Select Subject</option>
+                {SUBJECTS_BY_GRADE[activeGrade].map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
               </div>
               <div className="erp-form-row">
                 <div className="erp-form-group">
