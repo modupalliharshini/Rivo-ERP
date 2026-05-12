@@ -1,56 +1,67 @@
-import React from 'react';
-import styles from './page.module.css';
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { createClient } from '@/utils/supabase/client';
 import PageHeader from '../../components/PageHeader';
+import styles from './page.module.css';
+import { Loader2, Clock, MapPin, GraduationCap } from 'lucide-react';
 
-const SCHEDULE = [
-  { time: '09:00 - 10:30', Mon: 'Comp Networks', Tue: '-', Wed: 'Comp Networks', Thu: '-', Fri: 'Lab Session' },
-  { time: '11:00 - 12:30', Mon: '-', Tue: 'Software Eng.', Wed: '-', Thu: 'Software Eng.', Fri: '-' },
-  { time: '02:00 - 03:30', Mon: 'Databases', Tue: 'Databases', Wed: '-', Thu: '-', Fri: 'Databases' },
-];
+const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-const DAY_KEYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'] as const;
+export default function FacultyTimetablePage() {
+  const [schedule, setSchedule] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const supabase = createClient();
 
-const CELL_COLORS: Record<string, string> = {
-  'Comp Networks': 'cellBlue',
-  'Software Eng.': 'cellGreen',
-  'Databases': 'cellYellow',
-  'Lab Session': 'cellBlue',
-  '-': 'cellEmpty',
-};
+  useEffect(() => {
+    const fetchSchedule = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-export default function TimetablePage() {
+      const { data, error } = await supabase
+        .from('timetables')
+        .select('*')
+        .eq('faculty_id', user.id)
+        .order('start_time', { ascending: true });
+
+      if (data) setSchedule(data);
+      setIsLoading(false);
+    };
+
+    fetchSchedule();
+  }, []);
+
+  if (isLoading) return <div className={styles.loading}><Loader2 className="spin" /> Loading Schedule...</div>;
+
   return (
     <main className={styles.main}>
-      <PageHeader titleStart="My" titleHighlight="Timetables" />
+      <PageHeader titleStart="My" titleHighlight="Schedule" />
 
-      <div className={styles.tableCard}>
-        <h2 className={styles.tableTitle}>Weekly Schedule</h2>
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Time</th>
-                {DAYS.map(d => <th key={d}>{d}</th>)}
-              </tr>
-            </thead>
-            <tbody>
-              {SCHEDULE.map(row => (
-                <tr key={row.time}>
-                  <td className={styles.timeCell}>{row.time}</td>
-                  {DAY_KEYS.map(day => {
-                    const val = row[day];
-                    return (
-                      <td key={day} className={`${styles.cell} ${styles[CELL_COLORS[val]]}`}>
-                        {val !== '-' ? val : <span className={styles.dash}>-</span>}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <div className={styles.grid}>
+        {DAYS.map(day => (
+          <div key={day} className={styles.dayColumn}>
+            <h3 className={styles.dayTitle}>{day}</h3>
+            <div className={styles.slots}>
+              {schedule.filter(s => s.day_of_week === day).length === 0 ? (
+                <div className={styles.empty}>No classes</div>
+              ) : (
+                schedule.filter(s => s.day_of_week === day).map(slot => (
+                  <div key={slot.id} className={styles.slotCard}>
+                    <div className={styles.timeRow}>
+                      <Clock size={14} />
+                      <span>{slot.start_time.substring(0, 5)} - {slot.end_time.substring(0, 5)}</span>
+                    </div>
+                    <h4 className={styles.subject}>{slot.subject}</h4>
+                    <div className={styles.meta}>
+                      <span><GraduationCap size={14} /> {slot.grade}</span>
+                      {slot.room && <span><MapPin size={14} /> {slot.room}</span>}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        ))}
       </div>
     </main>
   );
