@@ -3,6 +3,7 @@
 import React from 'react';
 import PageHeader from '../../components/PageHeader';
 import styles from './page.module.css';
+import { AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
 const BORROWED_BOOKS = [
@@ -25,34 +26,18 @@ export default function LibraryPage() {
       />
 
       <section className={styles.tableSection}>
-        <h2 className={styles.sectionTitle}>Currently Borrowed</h2>
-        
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Book Title</th>
-              <th>Author</th>
-              <th>Issue Date</th>
-              <th>Return Date</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {BORROWED_BOOKS.map((row, idx) => (
-              <tr key={idx}>
-                <td>{row.title}</td>
-                <td>{row.author}</td>
-                <td>{row.issueDate}</td>
-                <td>{row.returnDate}</td>
-                <td>
-                  <span className={`${styles.badge} ${styles[row.statusClass]}`}>
-                    {row.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className={styles.comingSoonContainer}>
+          <div className={styles.comingSoonIcon}>
+            <AlertCircle size={64} color="#f59e0b" />
+          </div>
+          <h2>Digital Library Coming Soon</h2>
+          <p>We are currently setting up the digital library for your grade. Soon you will be able to browse available books, request digital copies, and track your borrowed resources directly from this portal.</p>
+          <div className={styles.comingSoonAction}>
+            <span className={styles.maintenanceBadge}>
+              Migration in Progress
+            </span>
+          </div>
+        </div>
       </section>
 
       <div className={styles.backLinkContainer}>
