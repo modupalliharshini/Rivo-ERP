@@ -22,6 +22,9 @@ export default function LoginPage() {
           <p>Please sign in to access your portal</p>
         </div>
         <LoginForm />
+        <div style={{marginTop: '2rem', textAlign: 'center', fontSize: '0.9rem', color: '#64748b'}}>
+          Powered by <a href="https://pickmyschoolai.com/" target="_blank" rel="noopener noreferrer" style={{color: '#c91f28', fontWeight: '600'}}>Pick My School Ai</a>
+        </div>
       </div>
     </main>
   );
