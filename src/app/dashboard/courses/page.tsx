@@ -4,13 +4,14 @@ import React, { useState } from 'react';
 import PageHeader from '../../components/PageHeader';
 import Modal from '../components/Modal';
 import styles from './page.module.css';
-import { Plus, CodeSquare, FlaskConical, Calculator, LineChart, ArrowRight, BookOpen, Globe } from 'lucide-react';
+import { Plus, CodeSquare, FlaskConical, Calculator, LineChart, ArrowRight, BookOpen, Globe, AlertCircle } from 'lucide-react';
 
 import { RIVO_SUBJECTS } from '../../constants/subjects';
 
 export default function CoursesPage() {
   const [selectedGrade, setSelectedGrade] = useState('Playgroup');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
   const [newCourse, setNewCourse] = useState({
     title: '',
     tag: 'Degree',
@@ -98,9 +99,12 @@ export default function CoursesPage() {
               
               <div className={styles.cardFooter}>
                 <span className={styles.pillGray}>Standard</span>
-                <a href="#" className={styles.manageLink}>
+                <button 
+                  className={styles.manageBtn} 
+                  onClick={() => setIsComingSoonOpen(true)}
+                >
                   Manage <ArrowRight size={16} />
-                </a>
+                </button>
               </div>
             </div>
           );
@@ -114,6 +118,7 @@ export default function CoursesPage() {
         </div>
       </section>
 
+      {/* Add Course Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -180,6 +185,26 @@ export default function CoursesPage() {
             </button>
           </div>
         </form>
+      </Modal>
+
+      {/* Feature Not Available Modal */}
+      <Modal
+        isOpen={isComingSoonOpen}
+        onClose={() => setIsComingSoonOpen(false)}
+        title="System Notice"
+      >
+        <div className={styles.comingSoonContent}>
+          <div className={styles.comingSoonIcon}>
+            <AlertCircle size={48} color="#f59e0b" />
+          </div>
+          <h3>Feature Not Available</h3>
+          <p>The Course Management module is currently under maintenance. Detailed editing and analytics for individual subjects will be enabled in the next update.</p>
+          <div className={styles.modalFooter}>
+            <button className="erp-btn-submit" onClick={() => setIsComingSoonOpen(false)}>
+              Understood
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

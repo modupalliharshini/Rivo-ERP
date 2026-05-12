@@ -110,19 +110,50 @@
   font-weight: 600;
 }
 
-.manageLink {
-  color: #3b82f6;
-  font-size: 0.95rem;
-  font-weight: 600;
-  text-decoration: none;
+.manageBtn {
   display: flex;
   align-items: center;
-  gap: 0.2rem;
-  transition: opacity 0.2s ease;
+  gap: 0.5rem;
+  color: #1d4ed8;
+  font-weight: 700;
+  font-size: 0.95rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s;
+  padding: 0;
 }
 
-.manageLink:hover {
-  opacity: 0.8;
+.manageBtn:hover {
+  transform: translateX(4px);
+}
+
+.comingSoonContent {
+  text-align: center;
+  padding: 1.5rem 0;
+}
+
+.comingSoonIcon {
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.comingSoonContent h3 {
+  color: #1e293b;
+  margin-bottom: 0.75rem;
+  font-size: 1.25rem;
+}
+
+.comingSoonContent p {
+  color: #64748b;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: center;
 }
 
 /* Graph Section */
