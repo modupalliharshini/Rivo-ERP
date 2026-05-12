@@ -6,14 +6,10 @@ import Modal from '../components/Modal';
 import styles from './page.module.css';
 import { Plus, CodeSquare, FlaskConical, Calculator, LineChart, ArrowRight, BookOpen, Globe } from 'lucide-react';
 
-const INITIAL_COURSES = [
-  { id: 1, title: 'Computer Science', sub: '12 Modules | 4 Faculty', tag: 'Degree', icon: CodeSquare, colorClass: styles.iconWrapperBlue },
-  { id: 2, title: 'Chemical Sciences', sub: '8 Modules | 2 Faculty', tag: 'Diploma', icon: FlaskConical, colorClass: styles.iconWrapperGreen },
-  { id: 3, title: 'Advanced Mathematics', sub: '14 Modules | 6 Faculty', tag: 'K-12', icon: Calculator, colorClass: styles.iconWrapperRed },
-];
+import { RIVO_SUBJECTS } from '../../constants/subjects';
 
 export default function CoursesPage() {
-  const [courses, setCourses] = useState(INITIAL_COURSES);
+  const [selectedGrade, setSelectedGrade] = useState('Playgroup');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newCourse, setNewCourse] = useState({
     title: '',
@@ -69,21 +65,39 @@ export default function CoursesPage() {
         }
       />
 
+      <div className={styles.filterSection}>
+        {Object.keys(RIVO_SUBJECTS).map(grade => (
+          <button 
+            key={grade} 
+            className={`${styles.filterBtn} ${selectedGrade === grade ? styles.active : ''}`}
+            onClick={() => setSelectedGrade(grade)}
+          >
+            {grade}
+          </button>
+        ))}
+      </div>
+
       <section className={styles.courseCardsGrid}>
-        {courses.map((course) => {
-          const Icon = course.icon;
+        {(RIVO_SUBJECTS[selectedGrade as keyof typeof RIVO_SUBJECTS] || []).map((subject, index) => {
+          let Icon = BookOpen;
+          let colorClass = styles.iconWrapperBlue;
+          
+          if (subject.toLowerCase().includes('science')) { Icon = FlaskConical; colorClass = styles.iconWrapperGreen; }
+          if (subject.toLowerCase().includes('math')) { Icon = Calculator; colorClass = styles.iconWrapperRed; }
+          if (subject.toLowerCase().includes('draw') || subject.toLowerCase().includes('color')) { Icon = Globe; colorClass = styles.iconWrapperYellow; }
+
           return (
-            <div key={course.id} className={`${styles.courseCard} card-shadow`}>
+            <div key={index} className={`${styles.courseCard} card-shadow`}>
               <div className={styles.iconContainer}>
-                <div className={`${styles.iconWrapper} ${course.colorClass}`}>
+                <div className={`${styles.iconWrapper} ${colorClass}`}>
                   <Icon size={24} />
                 </div>
               </div>
-              <h3 className={styles.courseTitle}>{course.title}</h3>
-              <p className={styles.courseSub}>{course.sub}</p>
+              <h3 className={styles.courseTitle}>{subject}</h3>
+              <p className={styles.courseSub}>Core Module | {selectedGrade}</p>
               
               <div className={styles.cardFooter}>
-                <span className={styles.pillGray}>{course.tag}</span>
+                <span className={styles.pillGray}>Standard</span>
                 <a href="#" className={styles.manageLink}>
                   Manage <ArrowRight size={16} />
                 </a>

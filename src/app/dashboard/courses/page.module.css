@@ -3,6 +3,38 @@
   flex-direction: column;
 }
 
+.filterSection {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.filterBtn {
+  padding: 0.6rem 1.25rem;
+  border-radius: 12px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.filterBtn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.filterBtn.active {
+  background: #1d4ed8;
+  color: white;
+  border-color: #1d4ed8;
+  box-shadow: 0 4px 12px rgba(29, 78, 216, 0.25);
+}
+
 .courseCardsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
