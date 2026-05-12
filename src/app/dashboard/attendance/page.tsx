@@ -4,16 +4,68 @@ import React, { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import PageHeader from '../../components/PageHeader';
 import styles from './page.module.css';
-import { Calendar, Download, Loader2, TrendingUp, Users, AlertCircle, Clock } from 'lucide-react';
+import { Calendar, Download, Loader2, TrendingUp, Users, AlertCircle, Clock, Eye } from 'lucide-react';
 
 const GRADES = ['Playgroup', 'Nursery', 'Pre-Primary 1', 'Pre-Primary 2'];
 
 export default function AdminAttendancePage() {
   const [records, setRecords] = useState<any[]>([]);
+  const [rawAttendance, setRawAttendance] = useState<any[]>([]);
   const [stats, setStats] = useState({ present: 0, absent: 0, late: 0, rate: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDetails, setSelectedDetails] = useState<any>(null);
   const supabase = createClient();
+
+  const openDetails = (slotRecord: any) => {
+    const slotAtt = rawAttendance.filter(a => a.timetable_id === slotRecord.id);
+    setSelectedDetails({
+      ...slotRecord,
+      students: slotAtt
+    });
+  };
+
+  const downloadReport = async (slotRecord: any) => {
+    const { jsPDF } = await import('jspdf');
+    const autoTable = (await import('jspdf-autotable')).default;
+    
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(20);
+    doc.setTextColor(40, 40, 40);
+    doc.text('Attendance Report', 14, 22);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Date: ${date}`, 14, 30);
+    doc.text(`Class: ${slotRecord.grade}`, 14, 35);
+    doc.text(`Subject: ${slotRecord.subject}`, 14, 40);
+    doc.text(`Time: ${slotRecord.time}`, 14, 45);
+    
+    // Stats
+    doc.text(`Present: ${slotRecord.present}`, 140, 30);
+    doc.text(`Absent: ${slotRecord.absent}`, 140, 35);
+    doc.text(`Late: ${slotRecord.late}`, 140, 40);
+    doc.text(`Percentage: ${slotRecord.percent}%`, 140, 45);
+
+    const slotAtt = rawAttendance.filter(a => a.timetable_id === slotRecord.id);
+    const tableData = slotAtt.map(a => [
+      `${a.profiles?.first_name || ''} ${a.profiles?.last_name || ''}`,
+      a.profiles?.email || '—',
+      a.status
+    ]);
+
+    autoTable(doc, {
+      startY: 55,
+      head: [['Student Name', 'Email / ID', 'Status']],
+      body: tableData,
+      theme: 'grid',
+      headStyles: { fillStyle: '#1d4ed8' }
+    });
+
+    doc.save(`Attendance_${slotRecord.grade}_${slotRecord.subject}_${date}.pdf`);
+  };
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -23,10 +75,14 @@ export default function AdminAttendancePage() {
     const { data: profile } = await supabase.from('profiles').select('institution_id').eq('id', user.id).single();
     if (!profile) return;
 
-    // Fetch all attendance for the selected date
+    // Fetch all attendance for the selected date with student names
     const { data: attData } = await supabase
       .from('attendance')
-      .select('*, timetables(subject, start_time)')
+      .select(`
+        *,
+        timetables(subject, start_time),
+        profiles:student_id(first_name, last_name, email)
+      `)
       .eq('institution_id', profile.institution_id)
       .eq('date', date);
 
@@ -46,6 +102,7 @@ export default function AdminAttendancePage() {
       .eq('role', 'student');
 
     if (slots) {
+      setRawAttendance(attData || []);
       const summary = slots.map(slot => {
         const slotAtt = attData?.filter(a => a.timetable_id === slot.id) || [];
         const totalInGrade = students?.filter(s => s.grade === slot.grade).length || 0;
@@ -65,9 +122,9 @@ export default function AdminAttendancePage() {
 
       setRecords(summary);
       
-      const totalPresent = attData?.filter(a => a.status === 'Present').length || 0;
-      const totalAbsent = attData?.filter(a => a.status === 'Absent').length || 0;
-      const totalLate = attData?.filter(a => a.status === 'Late').length || 0;
+      const totalPresent = summary.reduce((acc, s) => acc + s.present, 0);
+      const totalAbsent = summary.reduce((acc, s) => acc + s.absent, 0);
+      const totalLate = summary.reduce((acc, s) => acc + s.late, 0);
       const totalPossible = summary.reduce((acc, s) => acc + s.totalInGrade, 0);
       const totalRate = totalPossible > 0 ? Math.round((totalPresent / totalPossible) * 100) : 0;
       
@@ -126,43 +183,109 @@ export default function AdminAttendancePage() {
           <h2 className={styles.tableTitle}>Class-wise Summary</h2>
         </div>
 
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Class / Grade</th>
-              <th>Subject</th>
-              <th>Time</th>
-              <th>Total Students</th>
-              <th>Present</th>
-              <th>Absent</th>
-              <th>Late</th>
-              <th>Attendance %</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              <tr><td colSpan={8} style={{ textAlign: 'center', padding: '2rem' }}><Loader2 className="spin" /> Loading...</td></tr>
-            ) : records.map((row) => (
-              <tr key={row.id}>
-                <td className={styles.gradeCell}>{row.grade}</td>
-                <td className={styles.subjectCell}>{row.subject}</td>
-                <td>{row.time}</td>
-                <td>{row.totalInGrade}</td>
-                <td>{row.present}</td>
-                <td>{row.absent}</td>
-                <td>{row.late}</td>
-                <td>{row.percent}%</td>
-                <td>
-                  <span className={`${styles.statusBadge} ${row.percent >= 90 ? styles.bgGreen : row.percent >= 75 ? styles.bgYellow : styles.bgRed}`}>
-                    {row.percent >= 90 ? 'Excellent' : row.percent >= 75 ? 'Good' : 'Critical'}
-                  </span>
-                </td>
+        <div className={styles.tableScroll}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Class / Grade</th>
+                <th>Subject</th>
+                <th>Time</th>
+                <th>Total Students</th>
+                <th>Present</th>
+                <th>Absent</th>
+                <th>Late</th>
+                <th>Attendance %</th>
+                <th>Status</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {isLoading ? (
+                <tr><td colSpan={10} style={{ textAlign: 'center', padding: '2rem' }}><Loader2 className="spin" /> Loading...</td></tr>
+              ) : records.map((row) => (
+                <tr key={row.id}>
+                  <td className={styles.gradeCell}>{row.grade}</td>
+                  <td className={styles.subjectCell}>{row.subject}</td>
+                  <td>{row.time}</td>
+                  <td>{row.totalInGrade}</td>
+                  <td>{row.present}</td>
+                  <td>{row.absent}</td>
+                  <td>{row.late}</td>
+                  <td>{row.percent}%</td>
+                  <td>
+                    <span className={`${styles.statusBadge} ${row.percent >= 90 ? styles.bgGreen : row.percent >= 75 ? styles.bgYellow : styles.bgRed}`}>
+                      {row.percent >= 90 ? 'Excellent' : row.percent >= 75 ? 'Good' : 'Critical'}
+                    </span>
+                  </td>
+                  <td>
+                    <div className={styles.actionGroup}>
+                      <button className={styles.viewBtn} onClick={() => openDetails(row)}>
+                        <Eye size={14} /> View
+                      </button>
+                      <button className={styles.downloadBtn} onClick={() => downloadReport(row)}>
+                        <Download size={14} /> Report
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
+
+      {selectedDetails && (
+        <div className={styles.modalOverlay} onClick={() => setSelectedDetails(null)}>
+          <div className={styles.modal} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <div>
+                <h3>{selectedDetails.grade} - {selectedDetails.subject}</h3>
+                <p>{date} | {selectedDetails.time}</p>
+              </div>
+              <button className={styles.closeBtn} onClick={() => setSelectedDetails(null)}>×</button>
+            </div>
+            
+            <div className={styles.modalContent}>
+              {selectedDetails.students.length === 0 ? (
+                <div className={styles.emptyDetails}>No attendance marked for this session.</div>
+              ) : (
+                <table className={styles.detailTable}>
+                  <thead>
+                    <tr>
+                      <th>Student</th>
+                      <th>Email / ID</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedDetails.students.map((a: any) => (
+                      <tr key={a.id}>
+                        <td>{a.profiles?.first_name} {a.profiles?.last_name}</td>
+                        <td>{a.profiles?.email}</td>
+                        <td>
+                          <span className={`${styles.badge} ${
+                            a.status === 'Present' ? styles.bgGreen : 
+                            a.status === 'Absent' ? styles.bgRed : 
+                            styles.bgYellow
+                          }`}>
+                            {a.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+            
+            <div className={styles.modalFooter}>
+              <button className={styles.modalDownloadBtn} onClick={() => downloadReport(selectedDetails)}>
+                <Download size={16} /> Download Full PDF Report
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
