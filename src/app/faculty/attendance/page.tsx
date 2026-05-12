@@ -56,6 +56,10 @@ export default function FacultyAttendancePage() {
     fetchMySlots();
   }, [date]);
 
+  useEffect(() => {
+    setIsSuccess(false);
+  }, [attendance, date, selectedGrade, selectedSection]);
+
   const fetchStudents = async () => {
     if (!selectedGrade) {
       alert('No class selected');
@@ -143,7 +147,6 @@ export default function FacultyAttendancePage() {
       if (error) throw error;
       
       setIsSuccess(true);
-      setTimeout(() => setIsSuccess(false), 3000);
     } catch (err) {
       alert('Failed to submit attendance');
       console.error(err);
@@ -247,9 +250,15 @@ export default function FacultyAttendancePage() {
             <button 
               className={isSuccess ? styles.successBtn : styles.submitBtn} 
               onClick={handleSubmit} 
-              disabled={isSubmitting}
+              disabled={isSubmitting || isSuccess}
             >
-              {isSubmitting ? <Loader2 className="spin" size={20} /> : isSuccess ? <><CheckCircle2 size={20} /> Attendance Saved!</> : 'Submit Attendance'}
+              {isSubmitting ? (
+                <Loader2 className="spin" size={20} />
+              ) : isSuccess ? (
+                'Attendance Submitted ✓'
+              ) : (
+                'Submit Attendance'
+              )}
             </button>
           </div>
         </div>
