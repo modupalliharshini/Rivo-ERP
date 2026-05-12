@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import StatCard from './components/StatCard';
 import RecentAdmissions from './components/RecentAdmissions';
+import RecentFaculty from './components/RecentFaculty';
 import PageHeader from '../components/PageHeader';
 import { createClient } from '@/utils/supabase/client';
 
@@ -105,8 +106,9 @@ export default function AdminDashboardPage() {
         </div>
       </section>
 
-      <div className={styles.listWrapper}>
+      <div className={styles.listWrapper} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '2rem' }}>
         <RecentAdmissions />
+        <RecentFaculty />
       </div>
     </main>
   );

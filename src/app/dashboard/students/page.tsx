@@ -17,6 +17,7 @@ interface Student {
   section: string;
   phone: string;
   status?: string;
+  created_at: string;
 }
 
 export default function StudentsPage() {
@@ -169,9 +170,24 @@ export default function StudentsPage() {
       />
 
       <section className={styles.statsGrid}>
-        <div className={styles.statWrapper}><StatCard title="Total Enrolled" value={isLoading ? '...' : students.length.toString()} trend="" trendType="neutral" /></div>
-        <div className={styles.statWrapper}><StatCard title="Active Students" value={isLoading ? '...' : students.length.toString()} trend="" trendType="neutral" /></div>
-        <div className={styles.statWrapper}><StatCard title="New Admissions" value="0" trend="" trendType="neutral" /></div>
+        <div className={styles.statWrapper}>
+          <StatCard title="Total Enrolled" value={isLoading ? '...' : students.length.toString()} trend="" trendType="neutral" />
+        </div>
+        <div className={styles.statWrapper}>
+          <StatCard title="Active Students" value={isLoading ? '...' : students.length.toString()} trend="" trendType="neutral" />
+        </div>
+        <div className={styles.statWrapper}>
+          <StatCard 
+            title="New Admissions" 
+            value={isLoading ? '...' : students.filter(s => {
+              const thirtyDaysAgo = new Date();
+              thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+              return new Date(s.created_at) > thirtyDaysAgo;
+            }).length.toString()} 
+            trend="Last 30 days" 
+            trendType="positive" 
+          />
+        </div>
       </section>
 
       <section className={`${styles.tableCard} card-shadow`}>
