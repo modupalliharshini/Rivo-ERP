@@ -24,17 +24,19 @@ export default function AdminAttendancePage() {
     if (!profile) return;
 
     // Fetch all attendance for the selected date
-    const { data: attData, error: attError } = await supabase
+    const { data: attData } = await supabase
       .from('attendance')
-      .select('*')
+      .select('*, timetables(subject, start_time)')
       .eq('institution_id', profile.institution_id)
       .eq('date', date);
 
-    if (attError) {
-      console.error('Attendance fetch error:', attError);
-    }
-
-    console.log('Admin Attendance Data:', { date, count: attData?.length });
+    // Fetch all scheduled slots for today (to show classes even with 0 attendance)
+    const dayOfWeek = new Date(date).toLocaleDateString('en-US', { weekday: 'long' });
+    const { data: slots } = await supabase
+      .from('timetables')
+      .select('*')
+      .eq('institution_id', profile.institution_id)
+      .eq('day_of_week', dayOfWeek);
 
     // Fetch student counts per grade
     const { data: students } = await supabase
@@ -43,25 +45,31 @@ export default function AdminAttendancePage() {
       .eq('institution_id', profile.institution_id)
       .eq('role', 'student');
 
-    if (attData) {
-      const safeAttData = attData || [];
-      const summary = GRADES.map(grade => {
-        const gradeAtt = safeAttData.filter(a => a.grade === grade);
-        const totalInGrade = students?.filter(s => s.grade === grade).length || 0;
-        const present = gradeAtt.filter(a => a.status === 'Present').length;
-        const absent = gradeAtt.filter(a => a.status === 'Absent').length;
-        const late = gradeAtt.filter(a => a.status === 'Late').length;
+    if (slots) {
+      const summary = slots.map(slot => {
+        const slotAtt = attData?.filter(a => a.timetable_id === slot.id) || [];
+        const totalInGrade = students?.filter(s => s.grade === slot.grade).length || 0;
+        const present = slotAtt.filter(a => a.status === 'Present').length;
+        const absent = slotAtt.filter(a => a.status === 'Absent').length;
+        const late = slotAtt.filter(a => a.status === 'Late').length;
         const percent = totalInGrade > 0 ? Math.round((present / totalInGrade) * 100) : 0;
         
-        return { grade, totalInGrade, present, absent, late, percent };
+        return { 
+          id: slot.id,
+          grade: slot.grade, 
+          subject: slot.subject,
+          time: slot.start_time.substring(0, 5),
+          totalInGrade, present, absent, late, percent 
+        };
       });
 
       setRecords(summary);
       
-      const totalPresent = safeAttData.filter(a => a.status === 'Present').length;
-      const totalAbsent = safeAttData.filter(a => a.status === 'Absent').length;
-      const totalLate = safeAttData.filter(a => a.status === 'Late').length;
-      const totalRate = safeAttData.length > 0 ? Math.round((totalPresent / safeAttData.length) * 100) : 0;
+      const totalPresent = attData?.filter(a => a.status === 'Present').length || 0;
+      const totalAbsent = attData?.filter(a => a.status === 'Absent').length || 0;
+      const totalLate = attData?.filter(a => a.status === 'Late').length || 0;
+      const totalPossible = summary.reduce((acc, s) => acc + s.totalInGrade, 0);
+      const totalRate = totalPossible > 0 ? Math.round((totalPresent / totalPossible) * 100) : 0;
       
       setStats({ present: totalPresent, absent: totalAbsent, late: totalLate, rate: totalRate });
     }
@@ -122,6 +130,8 @@ export default function AdminAttendancePage() {
           <thead>
             <tr>
               <th>Class / Grade</th>
+              <th>Subject</th>
+              <th>Time</th>
               <th>Total Students</th>
               <th>Present</th>
               <th>Absent</th>
@@ -132,10 +142,12 @@ export default function AdminAttendancePage() {
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan={7} style={{ textAlign: 'center', padding: '2rem' }}><Loader2 className="spin" /> Loading...</td></tr>
+              <tr><td colSpan={8} style={{ textAlign: 'center', padding: '2rem' }}><Loader2 className="spin" /> Loading...</td></tr>
             ) : records.map((row) => (
-              <tr key={row.grade}>
+              <tr key={row.id}>
                 <td className={styles.gradeCell}>{row.grade}</td>
+                <td className={styles.subjectCell}>{row.subject}</td>
+                <td>{row.time}</td>
                 <td>{row.totalInGrade}</td>
                 <td>{row.present}</td>
                 <td>{row.absent}</td>

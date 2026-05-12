@@ -20,7 +20,7 @@ export default function StudentAttendancePage() {
 
       const { data, error } = await supabase
         .from('attendance')
-        .select('*')
+        .select('*, timetables(subject, start_time)')
         .eq('student_id', user.id)
         .order('date', { ascending: false });
 
@@ -86,7 +86,8 @@ export default function StudentAttendancePage() {
             <thead>
               <tr>
                 <th>Date</th>
-                <th>Day</th>
+                <th>Subject</th>
+                <th>Time</th>
                 <th>Status</th>
                 <th>Remarks</th>
               </tr>
@@ -94,8 +95,9 @@ export default function StudentAttendancePage() {
             <tbody>
               {history.map((row) => (
                 <tr key={row.id}>
-                  <td className={styles.dateCell}>{new Date(row.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
-                  <td>{new Date(row.date).toLocaleDateString('en-US', { weekday: 'long' })}</td>
+                  <td className={styles.dateCell}>{new Date(row.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</td>
+                  <td className={styles.subjectCell}>{row.timetables?.subject || '—'}</td>
+                  <td>{row.timetables?.start_time?.substring(0, 5) || '—'}</td>
                   <td>
                     <span className={`${styles.badge} ${
                       row.status === 'Present' ? styles.badgePresent : 
@@ -108,7 +110,7 @@ export default function StudentAttendancePage() {
                       {row.status}
                     </span>
                   </td>
-                  <td style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Automated entry</td>
+                  <td style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Class entry</td>
                 </tr>
               ))}
             </tbody>

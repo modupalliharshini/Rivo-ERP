@@ -40,14 +40,16 @@ export default function FacultyAttendancePage() {
       .eq('day_of_week', dayName);
     
     if (data) {
-      setScheduledSlots(data);
-      if (data.length > 0) {
+      if (data && data.length > 0) {
+        setScheduledSlots(data);
         setSelectedSlotId(data[0].id);
         setSelectedGrade(data[0].grade);
         // We don't have 'section' in timetables yet, so we'll use a default or assume it's part of 'grade' or 'room'
         // Actually, I'll add section to timetables if needed, but for now I'll just use the dropdown.
       } else {
+        setScheduledSlots([]);
         setSelectedSlotId('');
+        setSelectedGrade('');
       }
     }
   };
@@ -55,10 +57,6 @@ export default function FacultyAttendancePage() {
   useEffect(() => {
     fetchMySlots();
   }, [date]);
-
-  useEffect(() => {
-    setIsSuccess(false);
-  }, [attendance, date, selectedGrade, selectedSection]);
 
   const fetchStudents = async () => {
     if (!selectedGrade) {
@@ -78,31 +76,28 @@ export default function FacultyAttendancePage() {
       .select('id, first_name, last_name, email')
       .eq('institution_id', profile?.institution_id)
       .eq('role', 'student')
+      .select('*')
       .eq('grade', selectedGrade)
-      .ilike('section', selectedSection) // Case-insensitive match for 'A' vs 'a'
-      .order('first_name', { ascending: true });
+      .ilike('section', selectedSection)
+      .eq('role', 'student');
 
     if (error) {
-      console.error('Fetch error:', error);
-      alert('Error fetching student list');
-    } else if (data) {
-      console.log('Students found:', data.length);
-      if (data.length === 0) {
-        alert(`No students found for ${selectedGrade} Section ${selectedSection}. Please check student records.`);
-      }
-      setStudents(data);
+      alert('Failed to load students');
+    } else {
+      setStudents(data || []);
       const initial: Record<string, Status> = {};
       data.forEach(s => { initial[s.id] = 'Present'; });
       
+      // Check if attendance already exists for this specific slot and date
       const { data: existing } = await supabase
         .from('attendance')
         .select('*')
-        .eq('grade', selectedGrade)
-        .eq('section', selectedSection)
+        .eq('timetable_id', selectedSlotId)
         .eq('date', date);
       
       if (existing && existing.length > 0) {
         existing.forEach(e => { initial[e.student_id] = e.status as Status; });
+        setIsSuccess(true);
       }
       
       setAttendance(initial);
@@ -112,12 +107,14 @@ export default function FacultyAttendancePage() {
 
   const handleStatusChange = (studentId: string, status: Status) => {
     setAttendance(prev => ({ ...prev, [studentId]: status }));
+    setIsSuccess(false);
   };
 
   const markAll = (status: Status) => {
     const updated = { ...attendance };
     students.forEach(s => { updated[s.id] = status; });
     setAttendance(updated);
+    setIsSuccess(false);
   };
 
   const handleSubmit = async () => {
@@ -136,13 +133,14 @@ export default function FacultyAttendancePage() {
         date: date,
         status: attendance[s.id],
         grade: selectedGrade,
-        section: selectedSection
+        section: selectedSection,
+        timetable_id: selectedSlotId
       }));
 
-      // Use upsert to handle updates if attendance already marked
+      // Use upsert to handle updates for this specific slot
       const { error } = await supabase
         .from('attendance')
-        .upsert(records, { onConflict: 'student_id, date' });
+        .upsert(records, { onConflict: 'student_id, date, timetable_id' });
 
       if (error) throw error;
       
@@ -162,23 +160,34 @@ export default function FacultyAttendancePage() {
       <div className={styles.filterCard}>
         <div className={styles.filterGroup}>
           <label>Date</label>
-          <input type="date" value={date} onChange={e => setDate(e.target.value)} />
+          <input 
+            type="date" 
+            value={date} 
+            onChange={e => {
+              setDate(e.target.value);
+              setStudents([]);
+              setIsSuccess(false);
+            }} 
+          />
         </div>
         <div className={styles.filterGroup}>
           <label>Grade / Class (Scheduled)</label>
           <select 
-            value={selectedGrade} 
+            value={selectedSlotId} 
             onChange={e => {
-              setSelectedGrade(e.target.value);
-              const slot = scheduledSlots.find(s => s.grade === e.target.value);
-              if (slot) setSelectedSlotId(slot.id);
+              const slotId = e.target.value;
+              setSelectedSlotId(slotId);
+              const slot = scheduledSlots.find(s => s.id === slotId);
+              if (slot) setSelectedGrade(slot.grade);
+              setStudents([]); 
+              setIsSuccess(false);
             }}
           >
             {scheduledSlots.length === 0 ? (
               <option value="">No classes scheduled today</option>
             ) : (
               scheduledSlots.map(s => (
-                <option key={s.id} value={s.grade}>
+                <option key={s.id} value={s.id}>
                   {s.grade} - {s.subject} ({s.start_time.substring(0, 5)})
                 </option>
               ))
@@ -187,7 +196,14 @@ export default function FacultyAttendancePage() {
         </div>
         <div className={styles.filterGroup}>
           <label>Section</label>
-          <select value={selectedSection} onChange={e => setSelectedSection(e.target.value)}>
+          <select 
+            value={selectedSection} 
+            onChange={e => {
+              setSelectedSection(e.target.value);
+              setStudents([]);
+              setIsSuccess(false);
+            }}
+          >
             {SECTIONS.map(s => <option key={s} value={s}>Section {s}</option>)}
           </select>
         </div>
