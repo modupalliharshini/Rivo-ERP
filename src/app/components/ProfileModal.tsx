@@ -12,8 +12,8 @@ import {
   Eye,
   EyeOff
 } from 'lucide-react';
-import styles from '../page.module.css';
-import sectionStyles from '../sections/Sections.module.css';
+import styles from '../super-admin/page.module.css';
+import sectionStyles from '../super-admin/sections/Sections.module.css';
 import { createClient } from '@/utils/supabase/client';
 
 interface ProfileModalProps {

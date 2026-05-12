@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { LogOut, User, Settings, ChevronDown } from 'lucide-react';
 import styles from './PageHeader.module.css';
 import { createClient } from '@/utils/supabase/client';
+import ProfileModal from './ProfileModal';
 
 interface PageHeaderProps {
   titleStart: string;
@@ -20,38 +21,37 @@ export default function PageHeader({
   const [userName, setUserName] = useState('Admin');
   const [initials, setInitials] = useState('AD');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
+  const supabase = createClient();
+
+  const loadProfile = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('first_name, last_name, email')
+      .eq('id', user.id)
+      .single();
+
+    if (profile) {
+      if (profile.first_name) {
+        const fullName = `${profile.first_name} ${profile.last_name || ''}`.trim();
+        const computedInitials = `${profile.first_name[0]}${profile.last_name?.[0] || ''}`.toUpperCase();
+        setUserName(fullName);
+        setInitials(computedInitials);
+      } else {
+        const displayId = profile.email.replace('@rivo.local', '');
+        setUserName(displayId.toUpperCase());
+        setInitials(displayId.slice(0, 2).toUpperCase());
+      }
+    }
+  };
 
   useEffect(() => {
-    const loadProfile = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('first_name, last_name, email')
-        .eq('id', user.id)
-        .single();
-
-      if (profile) {
-        // If we have a real name, use it. Otherwise fall back to the user ID from email.
-        if (profile.first_name) {
-          const fullName = `${profile.first_name} ${profile.last_name || ''}`.trim();
-          const computedInitials = `${profile.first_name[0]}${profile.last_name?.[0] || ''}`.toUpperCase();
-          setUserName(fullName);
-          setInitials(computedInitials);
-        } else {
-          // Fallback: strip @rivo.local to show user ID
-          const displayId = profile.email.replace('@rivo.local', '');
-          setUserName(displayId.toUpperCase());
-          setInitials(displayId.slice(0, 2).toUpperCase());
-        }
-      }
-    };
-
     loadProfile();
     window.addEventListener('profileUpdated', loadProfile);
     return () => window.removeEventListener('profileUpdated', loadProfile);
@@ -67,8 +67,6 @@ export default function PageHeader({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const supabase = createClient();
 
   const handleLogout = async () => {
     localStorage.removeItem('userEmail');
@@ -110,15 +108,19 @@ export default function PageHeader({
                 className={styles.dropdownItem}
                 onClick={() => {
                   setIsDropdownOpen(false);
-                  if (pathname.startsWith('/student')) {
-                    router.push('/student/profile');
-                  }
+                  setIsProfileOpen(true);
                 }}
               >
                 <User size={18} />
                 <span>My Profile</span>
               </button>
-              <button className={styles.dropdownItem}>
+              <button 
+                className={styles.dropdownItem}
+                onClick={() => {
+                  setIsDropdownOpen(false);
+                  setIsProfileOpen(true);
+                }}
+              >
                 <Settings size={18} />
                 <span>Account Settings</span>
               </button>
@@ -135,6 +137,12 @@ export default function PageHeader({
           )}
         </div>
       </div>
+      
+      <ProfileModal 
+        isOpen={isProfileOpen} 
+        onClose={() => setIsProfileOpen(false)} 
+        onProfileUpdate={loadProfile}
+      />
     </header>
   );
 }

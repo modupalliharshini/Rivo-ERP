@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import SuperAdminHeaderStyles from '../super-admin/page.module.css';
 import { createClient } from '@/utils/supabase/client';
-import ProfileModal from '../super-admin/components/ProfileModal';
+import ProfileModal from './ProfileModal';
 
 interface SuperAdminHeaderProps {
   title: string;
