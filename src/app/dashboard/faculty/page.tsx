@@ -17,6 +17,9 @@ interface Faculty {
   designation: string;
   experience: string;
   status?: string;
+  sick_leave_balance?: number;
+  casual_leave_balance?: number;
+  earned_leave_balance?: number;
 }
 
 export default function FacultyPage() {
@@ -28,6 +31,9 @@ export default function FacultyPage() {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState<'directory' | 'leaves'>('directory');
+  const [leaveRequests, setLeaveRequests] = useState<any[]>([]);
+  const [isLeaveLoading, setIsLeaveLoading] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const [newMember, setNewMember] = useState({
@@ -38,7 +44,10 @@ export default function FacultyPage() {
     specialization: 'Science',
     designation: '',
     experience: '',
-    status: 'Present'
+    status: 'Present',
+    sickLeave: 12,
+    casualLeave: 8,
+    earnedLeave: 5
   });
 
   const supabase = createClient();
@@ -56,8 +65,38 @@ export default function FacultyPage() {
     setIsLoading(false);
   };
 
+  const fetchLeaves = async () => {
+    setIsLeaveLoading(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: profile } = await supabase.from('profiles').select('institution_id').eq('id', user?.id).single();
+
+    const { data, error } = await supabase
+      .from('leaves')
+      .select('*, profiles(first_name, last_name, specialization)')
+      .eq('institution_id', profile?.institution_id)
+      .order('created_at', { ascending: false });
+
+    if (!error && data) setLeaveRequests(data);
+    setIsLeaveLoading(false);
+  };
+
+  const handleLeaveAction = async (id: string, status: 'Approved' | 'Rejected') => {
+    try {
+      const { error } = await supabase
+        .from('leaves')
+        .update({ status })
+        .eq('id', id);
+
+      if (error) throw error;
+      fetchLeaves();
+    } catch (err) {
+      alert('Action failed');
+    }
+  };
+
   useEffect(() => {
     fetchFaculty();
+    fetchLeaves();
     function handleClickOutside(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setOpenMenuId(null);
@@ -90,15 +129,34 @@ export default function FacultyPage() {
           institutionId: profile?.institution_id,
           specialization: newMember.specialization,
           designation: newMember.designation,
-          experience: newMember.experience
+          experience: newMember.experience,
+          sickLeaveBalance: newMember.sickLeave,
+          casualLeaveBalance: newMember.casualLeave,
+          earnedLeaveBalance: newMember.earnedLeave
         }
       });
 
       if (invokeError) throw invokeError;
       if (data?.error) throw new Error(data.error);
 
+      // Ensure leave balances are set even if edge function is not updated
+      if (data?.user?.id) {
+        await supabase
+          .from('profiles')
+          .update({
+            sick_leave_balance: newMember.sickLeave,
+            casual_leave_balance: newMember.casualLeave,
+            earned_leave_balance: newMember.earnedLeave
+          })
+          .eq('id', data.user.id);
+      }
+
       setIsModalOpen(false);
-      setNewMember({ firstName: '', lastName: '', facultyId: '', password: '', specialization: 'Science', designation: '', experience: '', status: 'Present' });
+      setNewMember({ 
+        firstName: '', lastName: '', facultyId: '', password: '', 
+        specialization: 'Science', designation: '', experience: '', status: 'Present',
+        sickLeave: 12, casualLeave: 8, earnedLeave: 5
+      });
       fetchFaculty();
     } catch (err: any) {
       setError(err.message);
@@ -121,12 +179,27 @@ export default function FacultyPage() {
           lastName: editMember.last_name,
           specialization: editMember.specialization,
           designation: editMember.designation,
-          experience: editMember.experience
+          experience: editMember.experience,
+          sickLeaveBalance: editMember.sick_leave_balance,
+          casualLeaveBalance: editMember.casual_leave_balance,
+          earnedLeaveBalance: editMember.earned_leave_balance
         }
       });
 
       if (invokeError) throw invokeError;
       if (data?.error) throw new Error(data.error);
+
+      // Direct update for leave balances to ensure they save even if edge function is not updated
+      const { error: dbError } = await supabase
+        .from('profiles')
+        .update({
+          sick_leave_balance: editMember.sick_leave_balance,
+          casual_leave_balance: editMember.casual_leave_balance,
+          earned_leave_balance: editMember.earned_leave_balance
+        })
+        .eq('id', editMember.id);
+
+      if (dbError) console.warn('Direct profile update failed:', dbError);
 
       setEditMember(null);
       fetchFaculty();
@@ -187,11 +260,25 @@ export default function FacultyPage() {
 
       <section className={`${styles.tableCard} card-shadow`}>
         <div className={styles.tableHeader}>
-          <h2 className={styles.tableTitle}>Staff Directory</h2>
+          <div className={styles.tabContainer}>
+            <button 
+              className={`${styles.tabBtn} ${activeTab === 'directory' ? styles.tabActive : ''}`}
+              onClick={() => setActiveTab('directory')}
+            >
+              Staff Directory
+            </button>
+            <button 
+              className={`${styles.tabBtn} ${activeTab === 'leaves' ? styles.tabActive : ''}`}
+              onClick={() => setActiveTab('leaves')}
+            >
+              Leave Requests {leaveRequests.filter(l => l.status === 'Pending').length > 0 && <span className={styles.tabBadge}>{leaveRequests.filter(l => l.status === 'Pending').length}</span>}
+            </button>
+          </div>
           <input type="text" placeholder="Search staff..." className={styles.searchInput} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
         </div>
 
-        <table className={styles.table}>
+        {activeTab === 'directory' ? (
+          <table className={styles.table}>
           <thead>
             <tr>
               <th>Staff Name</th>
@@ -237,6 +324,65 @@ export default function FacultyPage() {
             ))}
           </tbody>
         </table>
+        ) : (
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Faculty Member</th>
+                <th>Type</th>
+                <th>Duration</th>
+                <th>Reason</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {isLeaveLoading ? (
+                <tr><td colSpan={6} style={{ textAlign: 'center', padding: '2rem' }}>Loading requests...</td></tr>
+              ) : leaveRequests.length === 0 ? (
+                <tr><td colSpan={6} style={{ textAlign: 'center', padding: '2rem' }}>No leave requests found</td></tr>
+              ) : leaveRequests.map((leave) => (
+                <tr key={leave.id}>
+                  <td style={{ fontWeight: 600 }}>{leave.profiles?.first_name} {leave.profiles?.last_name}</td>
+                  <td>{leave.type}</td>
+                  <td>
+                    {new Date(leave.start_date).toLocaleDateString()} - {new Date(leave.end_date).toLocaleDateString()}
+                  </td>
+                  <td style={{ maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={leave.reason}>
+                    {leave.reason}
+                  </td>
+                  <td>
+                    <span className={`${styles.badge} ${
+                      leave.status === 'Approved' ? styles.badgePresent : 
+                      leave.status === 'Rejected' ? styles.badgeAbsent : 
+                      styles.badgePending
+                    }`}>
+                      {leave.status}
+                    </span>
+                  </td>
+                  <td>
+                    {leave.status === 'Pending' && (
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button 
+                          onClick={() => handleLeaveAction(leave.id, 'Approved')}
+                          className={styles.approveBtn}
+                        >
+                          Approve
+                        </button>
+                        <button 
+                          onClick={() => handleLeaveAction(leave.id, 'Rejected')}
+                          className={styles.rejectBtn}
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </section>
 
       {/* Hire Modal */}
@@ -264,7 +410,14 @@ export default function FacultyPage() {
             </div>
             <div className="erp-form-group"><label>Designation</label><input className="erp-input" type="text" required value={newMember.designation} onChange={(e) => setNewMember({...newMember, designation: e.target.value})} /></div>
           </div>
-          <div className="erp-form-group"><label>Experience</label><input className="erp-input" type="text" required value={newMember.experience} onChange={(e) => setNewMember({...newMember, experience: e.target.value})} /></div>
+          <div className="erp-form-row">
+            <div className="erp-form-group"><label>Experience</label><input className="erp-input" type="text" required value={newMember.experience} onChange={(e) => setNewMember({...newMember, experience: e.target.value})} /></div>
+            <div className="erp-form-group"><label>Sick Leave</label><input className="erp-input" type="number" value={newMember.sickLeave} onChange={(e) => setNewMember({...newMember, sickLeave: parseInt(e.target.value)})} /></div>
+          </div>
+          <div className="erp-form-row">
+            <div className="erp-form-group"><label>Casual Leave</label><input className="erp-input" type="number" value={newMember.casualLeave} onChange={(e) => setNewMember({...newMember, casualLeave: parseInt(e.target.value)})} /></div>
+            <div className="erp-form-group"><label>Earned Leave</label><input className="erp-input" type="number" value={newMember.earnedLeave} onChange={(e) => setNewMember({...newMember, earnedLeave: parseInt(e.target.value)})} /></div>
+          </div>
           <div className="erp-form-actions">
             <button type="button" className="erp-btn-cancel" onClick={() => setIsModalOpen(false)}>Cancel</button>
             <button type="submit" className="erp-btn-submit" disabled={isSubmitting}>{isSubmitting ? <Loader2 className="spin" size={16} /> : 'Complete Hiring'}</button>
@@ -294,7 +447,14 @@ export default function FacultyPage() {
               </div>
               <div className="erp-form-group"><label>Designation</label><input className="erp-input" type="text" required value={editMember.designation} onChange={(e) => setEditMember({...editMember, designation: e.target.value})} /></div>
             </div>
-            <div className="erp-form-group"><label>Experience</label><input className="erp-input" type="text" required value={editMember.experience} onChange={(e) => setEditMember({...editMember, experience: e.target.value})} /></div>
+            <div className="erp-form-row">
+              <div className="erp-form-group"><label>Experience</label><input className="erp-input" type="text" required value={editMember.experience} onChange={(e) => setEditMember({...editMember, experience: e.target.value})} /></div>
+              <div className="erp-form-group"><label>Sick Leave</label><input className="erp-input" type="number" value={editMember.sick_leave_balance} onChange={(e) => setEditMember({...editMember, sick_leave_balance: parseInt(e.target.value)})} /></div>
+            </div>
+            <div className="erp-form-row">
+              <div className="erp-form-group"><label>Casual Leave</label><input className="erp-input" type="number" value={editMember.casual_leave_balance} onChange={(e) => setEditMember({...editMember, casual_leave_balance: parseInt(e.target.value)})} /></div>
+              <div className="erp-form-group"><label>Earned Leave</label><input className="erp-input" type="number" value={editMember.earned_leave_balance} onChange={(e) => setEditMember({...editMember, earned_leave_balance: parseInt(e.target.value)})} /></div>
+            </div>
             <div className="erp-form-actions">
               <button type="button" className="erp-btn-cancel" onClick={() => setEditMember(null)}>Cancel</button>
               <button type="submit" className="erp-btn-submit" disabled={isSubmitting}>{isSubmitting ? <Loader2 className="spin" size={16} /> : 'Update Staff'}</button>

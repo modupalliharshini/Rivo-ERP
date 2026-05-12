@@ -15,6 +15,7 @@ import {
   Notebook,
   CalendarDays,
   Headphones,
+  CalendarX,
   UserCircle,
   Menu,
   X
@@ -29,6 +30,7 @@ const FACULTY_MENU_ITEMS = [
   { name: 'My Students', path: '/faculty/students', icon: Users },
   { name: 'Counselling Diary', path: '/faculty/counselling', icon: Notebook },
   { name: 'Time Tables', path: '/faculty/timetable', icon: CalendarDays },
+  { name: 'Apply Leave', path: '/faculty/leave', icon: CalendarX },
   { name: 'Raise Ticket', path: '/faculty/support', icon: Headphones },
 ];
 

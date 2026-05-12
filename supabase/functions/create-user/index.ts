@@ -27,7 +27,8 @@ serve(async (req) => {
     const reqData = await req.json();
     const { 
       email, password, role, firstName, lastName, institutionId,
-      grade, section, phone, specialization, designation, experience
+      grade, section, phone, specialization, designation, experience,
+      sickLeaveBalance, casualLeaveBalance, earnedLeaveBalance
     } = reqData;
 
     // Optional: Bootstrapping check - if no profiles exist, allow creating the first super_admin
@@ -92,7 +93,10 @@ serve(async (req) => {
         phone: phone || null,
         specialization: specialization || null,
         designation: designation || null,
-        experience: experience || null
+        experience: experience || null,
+        sick_leave_balance: sickLeaveBalance || 12,
+        casual_leave_balance: casualLeaveBalance || 8,
+        earned_leave_balance: earnedLeaveBalance || 5
       });
 
     if (profileError) {

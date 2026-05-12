@@ -45,7 +45,8 @@ serve(async (req) => {
     const reqData = await req.json();
     const { 
       targetUserId, firstName, lastName, role, password, institutionId,
-      grade, section, phone, specialization, designation, experience
+      grade, section, phone, specialization, designation, experience,
+      sickLeaveBalance, casualLeaveBalance, earnedLeaveBalance
     } = reqData;
 
     if (!targetUserId) {
@@ -96,6 +97,9 @@ serve(async (req) => {
     if (specialization !== undefined) profileUpdates.specialization = specialization || null;
     if (designation !== undefined) profileUpdates.designation = designation || null;
     if (experience !== undefined) profileUpdates.experience = experience || null;
+    if (sickLeaveBalance !== undefined) profileUpdates.sick_leave_balance = sickLeaveBalance;
+    if (casualLeaveBalance !== undefined) profileUpdates.casual_leave_balance = casualLeaveBalance;
+    if (earnedLeaveBalance !== undefined) profileUpdates.earned_leave_balance = earnedLeaveBalance;
 
     if (Object.keys(profileUpdates).length > 0) {
       const { error: profileError } = await supabaseClient
