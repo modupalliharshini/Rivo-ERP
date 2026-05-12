@@ -1,24 +1,39 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Download,
   ShieldCheck,
   AlertTriangle,
-  History
+  History,
+  Loader2
 } from 'lucide-react';
 import styles from '../page.module.css';
 import sectionStyles from '../sections/Sections.module.css';
 import SuperAdminHeader from '../../components/SuperAdminHeader';
-
-const LOGS = [
-  { timestamp: '2026-03-28 10:15:32', user: 'Super Admin', action: 'Added Institution', target: 'Oakridge School', ip: '192.168.1.45', status: 'Success' },
-  { timestamp: '2026-03-28 09:42:11', user: 'smith@greenwood.com', action: 'Login', target: 'Admin Dashboard', ip: '103.22.11.5', status: 'Success' },
-  { timestamp: '2026-03-28 09:12:05', user: 'Unknown User', action: 'Failed Login', target: 'Super Admin Portal', ip: '184.22.45.1', status: 'Denied' },
-  { timestamp: '2026-03-27 18:22:15', user: 'Super Admin', action: 'Modified License', target: 'Sunshine Int.', ip: '192.168.1.45', status: 'Success' },
-];
+import { createClient } from '@/utils/supabase/client';
 
 export default function AuditLogs() {
+  const [logs, setLogs] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const fetchLogs = async () => {
+      const { data, error } = await supabase
+        .from('audit_logs')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        setLogs(data);
+      }
+      setIsLoading(false);
+    };
+
+    fetchLogs();
+  }, []);
+
   return (
     <div className={styles.pageWrapper}>
       <SuperAdminHeader title="Audit" highlight="Logs" />
@@ -34,35 +49,57 @@ export default function AuditLogs() {
         </div>
 
         <div className={sectionStyles.tableResponsive}>
-          <table className={sectionStyles.table}>
-            <thead>
-              <tr>
-                <th>Timestamp</th>
-                <th>User</th>
-                <th>Action</th>
-                <th>Target</th>
-                <th>IP Address</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {LOGS.map((log, index) => (
-                <tr key={index}>
-                  <td style={{color: '#64748b', fontSize: '0.9rem'}}>{log.timestamp}</td>
-                  <td style={{fontWeight: '500'}}>{log.user}</td>
-                  <td>{log.action}</td>
-                  <td>{log.target}</td>
-                  <td style={{fontFamily: 'monospace', fontSize: '0.9rem', color: '#64748b'}}>{log.ip}</td>
-                  <td>
-                    <span className={`${sectionStyles.statusBadge} ${sectionStyles[log.status.toLowerCase()]}`}>
-                       {log.status === 'Success' ? <ShieldCheck size={14} style={{marginRight: '0.25rem'}} /> : <AlertTriangle size={14} style={{marginRight: '0.25rem'}} />}
-                       {log.status}
-                    </span>
-                  </td>
+          {isLoading ? (
+            <div style={{padding: '4rem', textAlign: 'center', color: '#64748b'}}>
+              <Loader2 className="animate-spin" style={{margin: '0 auto 1rem'}} />
+              Loading system activity...
+            </div>
+          ) : (
+            <table className={sectionStyles.table}>
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>User</th>
+                  <th>Action</th>
+                  <th>Target</th>
+                  <th>IP Address</th>
+                  <th>Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {logs.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} style={{textAlign: 'center', padding: '3rem', color: '#64748b'}}>
+                      No activity logs found.
+                    </td>
+                  </tr>
+                ) : (
+                  logs.map((log) => (
+                    <tr key={log.id}>
+                      <td style={{color: '#64748b', fontSize: '0.9rem'}}>
+                        {new Date(log.created_at).toLocaleString()}
+                      </td>
+                      <td style={{fontWeight: '500'}}>{log.user_email || 'System'}</td>
+                      <td>{log.action}</td>
+                      <td>{log.target || '-'}</td>
+                      <td style={{fontFamily: 'monospace', fontSize: '0.9rem', color: '#64748b'}}>
+                        {log.ip_address || '-'}
+                      </td>
+                      <td>
+                        <span className={`${sectionStyles.statusBadge} ${sectionStyles[log.status.toLowerCase()] || sectionStyles.success}`}>
+                           {log.status === 'Denied' || log.status === 'Failed' ? 
+                             <AlertTriangle size={14} style={{marginRight: '0.25rem'}} /> : 
+                             <ShieldCheck size={14} style={{marginRight: '0.25rem'}} />
+                           }
+                           {log.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>
