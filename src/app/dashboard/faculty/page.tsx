@@ -169,9 +169,20 @@ export default function FacultyPage() {
       />
 
       <section className={styles.statsGrid}>
-        <div className={styles.statWrapper}><StatCard title="Staff Strength" value={isLoading ? '...' : facultyList.length.toString()} trend="" trendType="neutral" /></div>
-        <div className={styles.statWrapper}><StatCard title="On Leave" value="0" trend="" trendType="neutral" /></div>
-        <div className={styles.statWrapper}><StatCard title="Department Count" value="12" trend="" trendType="neutral" /></div>
+        <div className={styles.statWrapper}>
+          <StatCard title="Staff Strength" value={isLoading ? '...' : facultyList.length.toString()} trend="Active Staff" trendType="positive" />
+        </div>
+        <div className={styles.statWrapper}>
+          <StatCard title="On Leave" value="0" trend="Presently" trendType="neutral" />
+        </div>
+        <div className={styles.statWrapper}>
+          <StatCard 
+            title="Department Count" 
+            value={isLoading ? '...' : new Set(facultyList.map(f => f.specialization)).size.toString()} 
+            trend="Academic Wings" 
+            trendType="info" 
+          />
+        </div>
       </section>
 
       <section className={`${styles.tableCard} card-shadow`}>
