@@ -6,7 +6,6 @@ interface CourseCardProps {
   semester: string;
   title: string;
   details: string;
-  progress: number;
   colorTheme: 'blue' | 'green' | 'lightblue';
 }
 
@@ -15,7 +14,6 @@ export default function CourseCard({
   semester,
   title,
   details,
-  progress,
   colorTheme
 }: CourseCardProps) {
   const themeClass = styles[`theme${colorTheme.charAt(0).toUpperCase() + colorTheme.slice(1)}`];
@@ -30,19 +28,6 @@ export default function CourseCard({
       <div className={styles.content}>
         <h3 className={styles.title}>{title}</h3>
         <p className={styles.details}>{details}</p>
-      </div>
-
-      <div className={styles.progressSection}>
-        <div className={styles.progressHeader}>
-          <span className={styles.progressLabel}>Progress</span>
-          <span className={styles.progressValue}>{progress}%</span>
-        </div>
-        <div className={styles.progressBarWrapper}>
-          <div 
-            className={`${styles.progressBarFill} ${themeClass}`}
-            style={{ width: `${progress}%` }}
-          />
-        </div>
       </div>
     </div>
   );

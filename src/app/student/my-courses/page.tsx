@@ -28,7 +28,6 @@ export default function MyCoursesPage() {
           semester: 'Current Session',
           title: s,
           details: 'Standard Module',
-          progress: Math.floor(Math.random() * 40) + 20,
           colorTheme: (['blue', 'green', 'lightblue'][i % 3]) as any
         }));
         setCourses(formatted);
