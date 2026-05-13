@@ -43,9 +43,12 @@ export default function MyStudentsPage() {
     setIsLoading(false);
   };
 
-  const filtered = students.filter(s =>
+  const filtered = students.map(s => ({
+    ...s,
+    computedRollNo: s.roll_no || s.email.split('@')[0]
+  })).filter(s =>
     `${s.first_name} ${s.last_name}`.toLowerCase().includes(search.toLowerCase()) ||
-    s.roll_no?.toLowerCase().includes(search.toLowerCase()) ||
+    s.computedRollNo.toLowerCase().includes(search.toLowerCase()) ||
     s.grade?.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -95,7 +98,9 @@ export default function MyStudentsPage() {
             <tbody>
               {filtered.map(s => (
                 <tr key={s.id}>
-                  <td>{s.roll_no || 'N/A'}</td>
+                  <td>
+                    <span className={styles.rollNoBadge}>{s.computedRollNo}</span>
+                  </td>
                   <td className={styles.studentName}>
                     {s.first_name} {s.last_name}
                   </td>

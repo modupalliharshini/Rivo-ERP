@@ -11,6 +11,16 @@
 .table th { text-align: left; padding: 0.75rem 1rem; font-size: 0.875rem; font-weight: 600; color: #374151; border-bottom: 2px solid #f3f4f6; }
 .table td { padding: 1rem; font-size: 0.9375rem; color: #374151; border-bottom: 1px solid #f9fafb; }
 .studentName { font-weight: 700; color: #111827; }
+.rollNoBadge {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 0.25rem 0.625rem;
+  border-radius: 6px;
+  font-family: monospace;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  border: 1px solid #e2e8f0;
+}
 .viewBtn { background: white; color: #374151; border: 1px solid #d1d5db; padding: 0.4rem 0.875rem; border-radius: 6px; font-size: 0.8125rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s; display: flex; align-items: center; gap: 0.4rem; }
 .viewBtn:hover { background: #f9fafb; border-color: #9ca3af; }
 
