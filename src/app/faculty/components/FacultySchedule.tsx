@@ -72,7 +72,7 @@ export default function FacultySchedule({ type, items }: FacultyScheduleProps) {
                     {session && (
                       <div className={styles.sessionBox}>
                         <div className={styles.sessionSubject}>{session.subject}</div>
-                        <div className={styles.sessionRoom}>{session.room}</div>
+                        <div className={styles.sessionRoom}>Room: {session.room}</div>
                       </div>
                     )}
                   </td>
