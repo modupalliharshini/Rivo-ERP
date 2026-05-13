@@ -155,6 +155,10 @@ export default function AssignmentsPage() {
       .eq('assignment_id', assignment.id)
       .order('submitted_at', { ascending: false });
 
+    console.log('Fetching submissions for assignment:', assignment.id);
+    console.log('Submissions data:', data);
+    if (error) console.error('Submissions fetch error:', error);
+
     if (data) setSubmissions(data);
     setIsSubmissionsLoading(false);
   };
@@ -321,10 +325,15 @@ export default function AssignmentsPage() {
             <div className={styles.modalHeader}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
-                  <h2>Submission Review</h2>
-                  <p>{selectedReview?.title} • {selectedReview?.grade}</p>
+                  <h2 className={styles.modalTitle}>Submission Review</h2>
+                  <p className={styles.modalSubtitle}>{selectedReview?.title} • {selectedReview?.grade}</p>
                 </div>
-                <button className="erp-btn-cancel" onClick={() => setIsReviewModalOpen(false)}>Close</button>
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                  <button className={styles.refreshBtn} onClick={() => openReviewModal(selectedReview)}>
+                    <Loader2 size={14} className={isSubmissionsLoading ? 'spin' : ''} /> Refresh
+                  </button>
+                  <button className="erp-btn-cancel" onClick={() => setIsReviewModalOpen(false)}>Close</button>
+                </div>
               </div>
             </div>
 
