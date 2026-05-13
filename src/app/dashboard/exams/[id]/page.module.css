@@ -154,5 +154,36 @@
 }
 
 @media (max-width: 768px) {
-  .addSubjectRow { flex-direction: column; }
+  .container {
+    padding: 1rem;
+  }
+
+  .setupCard {
+    padding: 1rem;
+  }
+
+  .addSubjectRow { 
+    flex-direction: row; 
+    max-width: 100%;
+  }
+
+  .addBtn span { display: none; }
+  .addBtn { padding: 0.5rem; }
+
+  .tag {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.5rem;
+  }
+
+  .stickyCol {
+    min-width: 140px;
+  }
+}
+
+@media (max-width: 480px) {
+  .addSubjectRow {
+    flex-direction: column;
+  }
+  
+  .addBtn span { display: inline; }
 }
