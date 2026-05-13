@@ -1,29 +1,52 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import PageHeader from '../../components/PageHeader';
-import { Search } from 'lucide-react';
-
-const STUDENTS = [
-  { rollNo: 'CS-2601', name: 'Alex Johnson', course: 'Computer Networks', performance: 'Excellent', attendance: '95%' },
-  { rollNo: 'CS-2602', name: 'Maria Garcia', course: 'Software Engineering', performance: 'Good', attendance: '88%' },
-  { rollNo: 'CS-2603', name: 'Liam Wilson', course: 'Database Systems', performance: 'Average', attendance: '92%' },
-];
-
-const PERF_STYLES: Record<string, string> = {
-  Excellent: 'perfExcellent',
-  Good: 'perfGood',
-  Average: 'perfAverage',
-};
+import { Search, User, Users, Loader2 } from 'lucide-react';
+import { createClient } from '@/utils/supabase/client';
 
 export default function MyStudentsPage() {
-  const [section, setSection] = useState('All Sections');
+  const [students, setStudents] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const supabase = createClient();
 
-  const filtered = STUDENTS.filter(s =>
-    s.name.toLowerCase().includes(search.toLowerCase()) ||
-    s.course.toLowerCase().includes(search.toLowerCase())
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+
+  const fetchStudents = async () => {
+    setIsLoading(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    // 1. Get unique grades assigned to this faculty from timetables
+    const { data: assignments } = await supabase
+      .from('timetables')
+      .select('grade')
+      .eq('faculty_id', user.id);
+
+    const assignedGrades = Array.from(new Set(assignments?.map(a => a.grade) || []));
+
+    if (assignedGrades.length > 0) {
+      // 2. Fetch students in those grades
+      const { data: studentsData, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('role', 'student')
+        .in('grade', assignedGrades)
+        .order('first_name', { ascending: true });
+
+      if (studentsData) setStudents(studentsData);
+    }
+    setIsLoading(false);
+  };
+
+  const filtered = students.filter(s =>
+    `${s.first_name} ${s.last_name}`.toLowerCase().includes(search.toLowerCase()) ||
+    s.roll_no?.toLowerCase().includes(search.toLowerCase()) ||
+    s.grade?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -32,56 +55,68 @@ export default function MyStudentsPage() {
 
       <div className={styles.tableCard}>
         <div className={styles.tableHeader}>
-          <h2 className={styles.tableTitle}>Student List – All Courses</h2>
+          <h2 className={styles.tableTitle}>
+            Student List {students.length > 0 ? `(${students.length})` : ''}
+          </h2>
           <div className={styles.controls}>
-            <select className={styles.sectionSelect} value={section} onChange={e => setSection(e.target.value)}>
-              <option>All Sections</option>
-              <option>Section A</option>
-              <option>Section B</option>
-            </select>
             <div className={styles.searchBox}>
               <Search size={14} className={styles.searchIcon} />
               <input
                 type="text"
-                placeholder="Search students..."
+                placeholder="Search by name, roll no, or grade..."
                 className={styles.searchInput}
                 value={search}
                 onChange={e => setSearch(e.target.value)}
               />
             </div>
+            <button className={styles.refreshBtn} onClick={fetchStudents} disabled={isLoading}>
+              <Loader2 size={14} className={isLoading ? styles.spin : ''} />
+              Refresh
+            </button>
           </div>
         </div>
 
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Roll No</th>
-              <th>Student Name</th>
-              <th>Course</th>
-              <th>Performance</th>
-              <th>Attendance</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(s => (
-              <tr key={s.rollNo}>
-                <td>{s.rollNo}</td>
-                <td className={styles.studentName}>{s.name}</td>
-                <td>{s.course}</td>
-                <td>
-                  <span className={`${styles.perfBadge} ${styles[PERF_STYLES[s.performance]]}`}>
-                    {s.performance}
-                  </span>
-                </td>
-                <td>{s.attendance}</td>
-                <td>
-                  <button className={styles.viewBtn}>View Profile</button>
-                </td>
+        {isLoading ? (
+          <div className={styles.loaderContainer}>
+            <Loader2 className={styles.spin} size={40} color="var(--primary)" />
+            <p>Loading your students...</p>
+          </div>
+        ) : filtered.length > 0 ? (
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Roll No</th>
+                <th>Student Name</th>
+                <th>Grade</th>
+                <th>Email</th>
+                <th>Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.map(s => (
+                <tr key={s.id}>
+                  <td>{s.roll_no || 'N/A'}</td>
+                  <td className={styles.studentName}>
+                    {s.first_name} {s.last_name}
+                  </td>
+                  <td>{s.grade}</td>
+                  <td>{s.email}</td>
+                  <td>
+                    <button className={styles.viewBtn}>
+                      <User size={14} />
+                      View Profile
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className={styles.emptyState}>
+            <Users size={48} color="#cbd5e1" />
+            <p>No students found {search ? 'matching your search' : 'for your assigned classes'}.</p>
+          </div>
+        )}
       </div>
     </main>
   );
