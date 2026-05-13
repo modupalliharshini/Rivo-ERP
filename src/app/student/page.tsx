@@ -37,9 +37,9 @@ export default function StudentDashboard() {
       .select('status')
       .eq('student_id', user.id);
     
-    const totalAttendance = attendanceData?.length || 0;
-    const presentCount = attendanceData?.filter(a => a.status === 'Present').length || 0;
-    const attendancePercent = totalAttendance > 0 ? ((presentCount / totalAttendance) * 100).toFixed(1) : '0';
+    const totalSlots = attendanceData?.length || 0;
+    const presentSlots = attendanceData?.filter(a => a.status === 'Present' || a.status === 'Late').length || 0;
+    const attendancePercent = totalSlots > 0 ? ((presentSlots / totalSlots) * 100).toFixed(1) : '0';
 
     // 3. Fetch Results (GPA Calculation)
     const { data: resultsData } = await supabase
