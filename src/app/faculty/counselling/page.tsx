@@ -33,15 +33,16 @@ export default function CounsellingPage() {
     if (!user) return;
 
     // Fetch Counselling Records for this faculty
-    const { data: recordsData } = await supabase
+    const { data: recordsData, error: fetchError } = await supabase
       .from('counselling_records')
       .select(`
         *,
-        profiles:student_id (first_name, last_name, roll_no, email)
+        student:profiles!student_id (first_name, last_name, email)
       `)
       .eq('faculty_id', user.id)
       .order('session_date', { ascending: false });
 
+    if (fetchError) console.error('Counselling Fetch Error:', fetchError);
     if (recordsData) setSessions(recordsData);
     setIsLoading(false);
   };
@@ -52,38 +53,31 @@ export default function CounsellingPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    // 1. Look up student by Name OR Roll Number
-    // First try Roll Number as it's more unique
-    let { data: student } = await supabase
-      .from('profiles')
-      .select('id, institution_id')
-      .eq('role', 'student')
-      .eq('roll_no', newEntry.rollNo)
-      .single();
-
-    if (!student) {
-      // Try by name (concatenated)
-      const { data: studentsByName } = await supabase
-        .from('profiles')
-        .select('id, institution_id')
-        .eq('role', 'student')
-        .ilike('first_name', `%${newEntry.studentName}%`);
-      
-      if (studentsByName && studentsByName.length > 0) {
-        student = studentsByName[0];
-      }
+    // 1. Validation: Roll number MUST start with "st"
+    const rollNoInput = newEntry.rollNo.trim().toLowerCase();
+    if (!rollNoInput.startsWith('st')) {
+      alert('Invalid Student ID. Student Roll Numbers must start with "st" (e.g., st123).');
+      setIsSaving(false);
+      return;
     }
 
-    if (!student) {
-      alert(`Student with Roll No "${newEntry.rollNo}" or Name "${newEntry.studentName}" not found. Please ensure they are registered in the system.`);
+    // 2. Look up student in the new student_identities table
+    const { data: identity, error: searchError } = await supabase
+      .from('student_identities')
+      .select('profile_id, institution_id')
+      .eq('roll_no', rollNoInput)
+      .maybeSingle();
+
+    if (!identity || searchError) {
+      alert(`Student with ID "${rollNoInput}" not found in the institutional records. Please ensure the student is registered.`);
       setIsSaving(false);
       return;
     }
 
     const { error } = await supabase.from('counselling_records').insert({
       faculty_id: user.id,
-      institution_id: student.institution_id,
-      student_id: student.id,
+      institution_id: identity.institution_id,
+      student_id: identity.profile_id,
       topic: newEntry.topic,
       observation: newEntry.observation,
       status: newEntry.status,
@@ -210,7 +204,7 @@ export default function CounsellingPage() {
               {sessions.map(s => (
                 <tr key={s.id}>
                   <td className={styles.studentName}>
-                    {s.profiles?.first_name} {s.profiles?.last_name}
+                    {s.student ? `${s.student.first_name} ${s.student.last_name}` : 'Unknown Student'}
                   </td>
                   <td>{new Date(s.session_date).toLocaleDateString()}</td>
                   <td>{s.topic}</td>
