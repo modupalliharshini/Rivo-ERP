@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import PageHeader from '../../components/PageHeader';
-import { Plus, Search, Loader2, Calendar, BookOpen, Clock, AlertCircle, Edit2, Trash2 } from 'lucide-react';
+import { Plus, Search, Loader2, Calendar, BookOpen, Clock, AlertCircle, Edit2, Trash2, ExternalLink } from 'lucide-react';
 import { createClient } from '../../../utils/supabase/client';
 
 export default function AssignmentsPage() {
@@ -139,6 +139,26 @@ export default function AssignmentsPage() {
     setIsModalOpen(true);
   };
 
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [selectedReview, setSelectedReview] = useState<any>(null);
+  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [isSubmissionsLoading, setIsSubmissionsLoading] = useState(false);
+
+  const openReviewModal = async (assignment: any) => {
+    setSelectedReview(assignment);
+    setIsReviewModalOpen(true);
+    setIsSubmissionsLoading(true);
+    
+    const { data, error } = await supabase
+      .from('assignment_submissions')
+      .select('*, profiles(first_name, last_name, roll_no)')
+      .eq('assignment_id', assignment.id)
+      .order('submitted_at', { ascending: false });
+
+    if (data) setSubmissions(data);
+    setIsSubmissionsLoading(false);
+  };
+
   const filtered = assignments.filter(a =>
     a.title.toLowerCase().includes(search.toLowerCase()) ||
     a.subject.toLowerCase().includes(search.toLowerCase())
@@ -206,7 +226,10 @@ export default function AssignmentsPage() {
                     </td>
                     <td>
                       <div className={styles.actionGroup}>
-                        <button className={!isClosed ? styles.reviewBtn : styles.gradesBtn}>
+                        <button 
+                          className={!isClosed ? styles.reviewBtn : styles.gradesBtn}
+                          onClick={() => openReviewModal(a)}
+                        >
                           {!isClosed ? 'Review' : 'View Grades'}
                         </button>
                         <button className={styles.editBtn} onClick={() => openEditModal(a)}>
@@ -289,6 +312,68 @@ export default function AssignmentsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {isReviewModalOpen && (
+        <div className="erp-modal-overlay">
+          <div className="erp-modal" style={{ maxWidth: '800px' }}>
+            <div className={styles.modalHeader}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <h2>Submission Review</h2>
+                  <p>{selectedReview?.title} • {selectedReview?.grade}</p>
+                </div>
+                <button className="erp-btn-cancel" onClick={() => setIsReviewModalOpen(false)}>Close</button>
+              </div>
+            </div>
+
+            <div className={styles.submissionsContainer}>
+              {isSubmissionsLoading ? (
+                <div className={styles.loaderContainer}>
+                  <Loader2 className="spin" size={32} />
+                  <p>Loading submissions...</p>
+                </div>
+              ) : submissions.length > 0 ? (
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Student</th>
+                      <th>Roll No</th>
+                      <th>Submitted At</th>
+                      <th>Link</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {submissions.map(s => (
+                      <tr key={s.id}>
+                        <td className={styles.studentName}>
+                          {s.profiles?.first_name} {s.profiles?.last_name}
+                        </td>
+                        <td>{s.profiles?.roll_no || 'N/A'}</td>
+                        <td>{new Date(s.submitted_at).toLocaleString()}</td>
+                        <td>
+                          <a 
+                            href={s.submission_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className={styles.workLink}
+                          >
+                            View Work <ExternalLink size={12} />
+                          </a>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <div className={styles.emptySubmissions}>
+                  <AlertCircle size={48} color="#94a3b8" />
+                  <h3>No Submissions Yet</h3>
+                  <p>Students haven't submitted any work for this assignment.</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
