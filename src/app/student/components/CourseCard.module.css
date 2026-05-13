@@ -63,6 +63,21 @@
   color: #6b7280;
 }
 
+.syllabusLink {
+  font-size: 0.875rem;
+  color: #1d4ed8;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 0.25rem;
+  transition: color 0.2s;
+}
+
+.syllabusLink:hover {
+  color: #1e40af;
+  text-decoration: underline;
+}
+
 .progressSection {
   margin-top: auto;
 }

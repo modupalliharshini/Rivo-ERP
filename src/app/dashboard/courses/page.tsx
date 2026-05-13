@@ -1,18 +1,24 @@
 'use client';
-
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PageHeader from '../../components/PageHeader';
 import Modal from '../components/Modal';
 import styles from './page.module.css';
-import { Plus, CodeSquare, FlaskConical, Calculator, LineChart, ArrowRight, BookOpen, Globe, AlertCircle } from 'lucide-react';
+import { Plus, CodeSquare, FlaskConical, Calculator, LineChart, ArrowRight, BookOpen, Globe, AlertCircle, Upload, CheckCircle } from 'lucide-react';
+import { createClient } from '../../../utils/supabase/client';
 
 import { RIVO_SUBJECTS } from '../../constants/subjects';
 
 export default function CoursesPage() {
+  const supabase = createClient();
   const [selectedGrade, setSelectedGrade] = useState('Playgroup');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
   const [courses, setCourses] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [currentCourseId, setCurrentCourseId] = useState<string | null>(null);
+
   const [newCourse, setNewCourse] = useState({
     title: '',
     tag: 'Degree',
@@ -20,43 +26,102 @@ export default function CoursesPage() {
     faculty: ''
   });
 
-  const handleAddCourse = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Simple icon/color assignment logic
-    let CourseIcon = BookOpen;
-    let ColorClass = styles.iconWrapperBlue;
-    
-    if (newCourse.title.toLowerCase().includes('science')) {
-      CourseIcon = FlaskConical;
-      ColorClass = styles.iconWrapperGreen;
-    } else if (newCourse.title.toLowerCase().includes('math') || newCourse.title.toLowerCase().includes('calc')) {
-      CourseIcon = Calculator;
-      ColorClass = styles.iconWrapperRed;
-    } else if (newCourse.title.toLowerCase().includes('computer') || newCourse.title.toLowerCase().includes('code')) {
-      CourseIcon = CodeSquare;
-      ColorClass = styles.iconWrapperBlue;
-    } else if (newCourse.title.toLowerCase().includes('history') || newCourse.title.toLowerCase().includes('world')) {
-      CourseIcon = Globe;
-      ColorClass = styles.iconWrapperGreen;
+  useEffect(() => {
+    fetchCourses();
+  }, [selectedGrade]);
+
+  const fetchCourses = async () => {
+    setIsLoading(true);
+    const { data, error } = await supabase
+      .from('courses')
+      .select('*')
+      .eq('grade', selectedGrade)
+      .order('title', { ascending: true });
+
+    if (data) {
+      setCourses(data);
     }
+    setIsLoading(false);
+  };
 
-    const course = {
-      id: courses.length + 1,
-      title: newCourse.title,
-      sub: `${newCourse.modules} Modules | ${newCourse.faculty} Faculty`,
-      tag: newCourse.tag,
-      icon: CourseIcon,
-      colorClass: ColorClass
-    };
+  const triggerUpload = (courseId: string) => {
+    setCurrentCourseId(courseId);
+    fileInputRef.current?.click();
+  };
 
-    setCourses([course, ...courses]);
-    setIsModalOpen(false);
-    setNewCourse({ title: '', tag: 'Degree', modules: '', faculty: '' });
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !currentCourseId) return;
+
+    setUploadingId(currentCourseId);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${currentCourseId}-${Math.random()}.${fileExt}`;
+      const filePath = `syllabuses/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('syllabuses')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('syllabuses')
+        .getPublicUrl(filePath);
+
+      const { error: updateError } = await supabase
+        .from('courses')
+        .update({ syllabus_url: publicUrl })
+        .eq('id', currentCourseId);
+
+      if (updateError) throw updateError;
+
+      fetchCourses();
+    } catch (error) {
+      console.error('Error uploading syllabus:', error);
+      alert('Failed to upload syllabus. Please try again.');
+    } finally {
+      setUploadingId(null);
+      setCurrentCourseId(null);
+    }
+  };
+
+  const handleAddCourse = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: profile } = await supabase.from('profiles').select('institution_id').eq('id', user.id).single();
+    if (!profile) return;
+
+    const { data, error } = await supabase
+      .from('courses')
+      .insert({
+        institution_id: profile.institution_id,
+        title: newCourse.title,
+        grade: selectedGrade,
+        module_count: parseInt(newCourse.modules) || 0,
+        faculty_count: parseInt(newCourse.faculty) || 0
+      })
+      .select()
+      .single();
+
+    if (data) {
+      setCourses([data, ...courses]);
+      setIsModalOpen(false);
+      setNewCourse({ title: '', tag: 'Degree', modules: '', faculty: '' });
+    }
   };
 
   return (
     <div className={styles.container}>
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        style={{ display: 'none' }} 
+        onChange={handleFileUpload}
+        accept=".pdf,.doc,.docx"
+      />
       <PageHeader
         titleStart="Course"
         titleHighlight="Catalog"
@@ -80,26 +145,43 @@ export default function CoursesPage() {
       </div>
 
       <section className={styles.courseCardsGrid}>
-        {(RIVO_SUBJECTS[selectedGrade as keyof typeof RIVO_SUBJECTS] || []).map((subject, index) => {
+        {isLoading ? (
+          <div className={styles.loaderContainer}>
+            <div className={styles.loader}></div>
+          </div>
+        ) : courses.map((course) => {
           let Icon = BookOpen;
           let colorClass = styles.iconWrapperBlue;
+          const subject = course.title;
           
           if (subject.toLowerCase().includes('science')) { Icon = FlaskConical; colorClass = styles.iconWrapperGreen; }
           if (subject.toLowerCase().includes('math')) { Icon = Calculator; colorClass = styles.iconWrapperRed; }
           if (subject.toLowerCase().includes('draw') || subject.toLowerCase().includes('color')) { Icon = Globe; colorClass = styles.iconWrapperYellow; }
 
           return (
-            <div key={`dynamic-${index}`} className={`${styles.courseCard} card-shadow`}>
+            <div key={course.id} className={`${styles.courseCard} card-shadow`}>
               <div className={styles.iconContainer}>
                 <div className={`${styles.iconWrapper} ${colorClass}`}>
                   <Icon size={24} />
                 </div>
               </div>
               <h3 className={styles.courseTitle}>{subject}</h3>
-              <p className={styles.courseSub}>Core Module | {selectedGrade}</p>
+              <p className={styles.courseSub}>Core Module | {course.grade}</p>
               
               <div className={styles.cardFooter}>
-                <span className={styles.pillGray}>Standard</span>
+                <button 
+                  className={`${styles.pillGray} ${course.syllabus_url ? styles.pillSuccess : ''}`}
+                  onClick={() => triggerUpload(course.id)}
+                  disabled={uploadingId === course.id}
+                >
+                  {uploadingId === course.id ? (
+                    'Uploading...'
+                  ) : course.syllabus_url ? (
+                    <><CheckCircle size={14} /> Syllabus Uploaded</>
+                  ) : (
+                    <><Upload size={14} /> Upload Syllabus</>
+                  )}
+                </button>
                 <button 
                   className={styles.manageBtn} 
                   onClick={() => setIsComingSoonOpen(true)}
@@ -110,28 +192,6 @@ export default function CoursesPage() {
             </div>
           );
         })}
-
-        {courses.map((course) => (
-          <div key={`manual-${course.id}`} className={`${styles.courseCard} card-shadow`}>
-            <div className={styles.iconContainer}>
-              <div className={`${styles.iconWrapper} ${course.colorClass}`}>
-                <course.icon size={24} />
-              </div>
-            </div>
-            <h3 className={styles.courseTitle}>{course.title}</h3>
-            <p className={styles.courseSub}>{course.sub}</p>
-            
-            <div className={styles.cardFooter}>
-              <span className={styles.pillGray}>{course.tag}</span>
-              <button 
-                className={styles.manageBtn} 
-                onClick={() => setIsComingSoonOpen(true)}
-              >
-                Manage <ArrowRight size={16} />
-              </button>
-            </div>
-          </div>
-        ))}
       </section>
 
       <section className={styles.graphSection}>

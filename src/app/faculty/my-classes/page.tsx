@@ -50,6 +50,14 @@ export default function MyClassesPage() {
             .eq('role', 'student')
             .eq('grade', grade);
 
+          // Get syllabus from courses table
+          const { data: courseData } = await supabase
+            .from('courses')
+            .select('syllabus_url')
+            .eq('grade', grade)
+            .eq('title', subject)
+            .single();
+
           // Icon Logic
           let Icon = BookOpen;
           if (subject.toLowerCase().includes('science')) Icon = FlaskConical;
@@ -61,9 +69,10 @@ export default function MyClassesPage() {
           return {
             title: subject,
             code: grade,
-            section: 'Standard',
+            section: courseData?.syllabus_url ? 'Syllabus Available' : 'View Syllabus',
             students: count || 0,
-            icon: <Icon size={24} />
+            icon: <Icon size={24} />,
+            syllabusUrl: courseData?.syllabus_url
           };
         }));
 

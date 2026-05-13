@@ -8,6 +8,7 @@ interface CourseCardProps {
   section: string;
   students: number;
   icon?: React.ReactNode;
+  syllabusUrl?: string | null;
 }
 
 export default function CourseCard({
@@ -15,7 +16,8 @@ export default function CourseCard({
   code,
   section,
   students,
-  icon
+  icon,
+  syllabusUrl
 }: CourseCardProps) {
   return (
     <div className={styles.card}>
@@ -40,8 +42,12 @@ export default function CourseCard({
         <button className={styles.primaryBtn}>
           View Roster <ArrowRight size={14} />
         </button>
-        <button className={styles.secondaryBtn}>
-          Syllabus
+        <button 
+          className={styles.secondaryBtn}
+          onClick={() => syllabusUrl && window.open(syllabusUrl, '_blank')}
+          disabled={!syllabusUrl}
+        >
+          {syllabusUrl ? 'Download Syllabus' : 'Syllabus'}
         </button>
       </div>
     </div>

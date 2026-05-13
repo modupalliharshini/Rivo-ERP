@@ -7,6 +7,7 @@ interface CourseCardProps {
   title: string;
   details: string;
   colorTheme: 'blue' | 'green' | 'lightblue';
+  syllabusUrl?: string | null;
 }
 
 export default function CourseCard({
@@ -14,7 +15,8 @@ export default function CourseCard({
   semester,
   title,
   details,
-  colorTheme
+  colorTheme,
+  syllabusUrl
 }: CourseCardProps) {
   const themeClass = styles[`theme${colorTheme.charAt(0).toUpperCase() + colorTheme.slice(1)}`];
 
@@ -27,7 +29,18 @@ export default function CourseCard({
       
       <div className={styles.content}>
         <h3 className={styles.title}>{title}</h3>
-        <p className={styles.details}>{details}</p>
+        {syllabusUrl ? (
+          <a 
+            href={syllabusUrl} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className={styles.syllabusLink}
+          >
+            Download Syllabus
+          </a>
+        ) : (
+          <p className={styles.details}>{details}</p>
+        )}
       </div>
     </div>
   );

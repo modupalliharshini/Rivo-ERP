@@ -21,16 +21,24 @@ export default function MyCoursesPage() {
 
       const { data: profile } = await supabase.from('profiles').select('grade').eq('id', user.id).single();
       if (profile && profile.grade) {
-        const subjects = RIVO_SUBJECTS[profile.grade as keyof typeof RIVO_SUBJECTS] || [];
-        const formatted = subjects.map((s, i) => ({
-          id: i,
-          code: `${profile.grade.substring(0, 2).toUpperCase()}${101 + i}`,
-          semester: 'Current Session',
-          title: s,
-          details: 'Standard Module',
-          colorTheme: (['blue', 'green', 'lightblue'][i % 3]) as any
-        }));
-        setCourses(formatted);
+        const { data: coursesData } = await supabase
+          .from('courses')
+          .select('*')
+          .eq('grade', profile.grade)
+          .order('title', { ascending: true });
+
+        if (coursesData) {
+          const formatted = coursesData.map((course, i) => ({
+            id: course.id,
+            code: `${profile.grade.substring(0, 2).toUpperCase()}${101 + i}`,
+            semester: 'Current Session',
+            title: course.title,
+            details: course.syllabus_url ? 'Syllabus Available' : 'View Syllabus',
+            colorTheme: (['blue', 'green', 'lightblue'][i % 3]) as any,
+            syllabusUrl: course.syllabus_url
+          }));
+          setCourses(formatted);
+        }
       }
       setIsLoading(false);
     };
