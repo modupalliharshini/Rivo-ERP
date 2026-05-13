@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import PageHeader from '../../components/PageHeader';
-import { Plus, Search, Loader2, Calendar, BookOpen, Clock, AlertCircle } from 'lucide-react';
+import { Plus, Search, Loader2, Calendar, BookOpen, Clock, AlertCircle, Edit2, Trash2 } from 'lucide-react';
 import { createClient } from '../../../utils/supabase/client';
 
 export default function AssignmentsPage() {
@@ -14,6 +14,7 @@ export default function AssignmentsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [facultyClasses, setFacultyClasses] = useState<any[]>([]);
+  const [editItem, setEditItem] = useState<any>(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -54,7 +55,6 @@ export default function AssignmentsPage() {
       .eq('faculty_id', user.id);
 
     if (data) {
-      // Unique combinations
       const unique = Array.from(new Set(data.map(s => `${s.grade}|${s.subject}`)));
       setFacultyClasses(unique.map(u => {
         const [grade, subject] = u.split('|');
@@ -71,30 +71,72 @@ export default function AssignmentsPage() {
       const { data: profile } = await supabase.from('profiles').select('institution_id').eq('id', user?.id).single();
       
       const [grade, subject] = formData.classKey.split('|');
+      const submissionData = {
+        institution_id: profile?.institution_id,
+        faculty_id: user?.id,
+        title: formData.title,
+        description: formData.description,
+        grade,
+        subject,
+        due_date: new Date(formData.due_date).toISOString()
+      };
 
-      const { error } = await supabase
-        .from('assignments')
-        .insert({
-          institution_id: profile?.institution_id,
-          faculty_id: user?.id,
-          title: formData.title,
-          description: formData.description,
-          grade,
-          subject,
-          due_date: new Date(formData.due_date).toISOString()
-        });
-
-      if (error) throw error;
+      if (editItem) {
+        const { error } = await supabase
+          .from('assignments')
+          .update(submissionData)
+          .eq('id', editItem.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('assignments')
+          .insert(submissionData);
+        if (error) throw error;
+      }
 
       setIsModalOpen(false);
+      setEditItem(null);
       setFormData({ title: '', description: '', classKey: '', due_date: '' });
       fetchAssignments();
     } catch (err) {
       console.error(err);
-      alert('Failed to create assignment');
+      alert('Failed to save assignment');
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this assignment? All student submissions for this assignment will also be removed.')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('assignments')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      fetchAssignments();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to delete assignment');
+    }
+  };
+
+  const openEditModal = (a: any) => {
+    const dueDate = new Date(a.due_date);
+    // Format for datetime-local input: YYYY-MM-DDTHH:MM
+    const tzOffset = dueDate.getTimezoneOffset() * 60000;
+    const localISOTime = new Date(dueDate.getTime() - tzOffset).toISOString().slice(0, 16);
+
+    setEditItem(a);
+    setFormData({
+      title: a.title,
+      description: a.description || '',
+      classKey: `${a.grade}|${a.subject}`,
+      due_date: localISOTime
+    });
+    setIsModalOpen(true);
   };
 
   const filtered = assignments.filter(a =>
@@ -108,7 +150,7 @@ export default function AssignmentsPage() {
         titleStart="Manage"
         titleHighlight="Assignments"
         actionElement={
-          <button className="btn-primary" onClick={() => setIsModalOpen(true)}>
+          <button className="btn-primary" onClick={() => { setEditItem(null); setFormData({ title: '', description: '', classKey: '', due_date: '' }); setIsModalOpen(true); }}>
             <Plus size={16} /> Create Assignment
           </button>
         }
@@ -142,7 +184,7 @@ export default function AssignmentsPage() {
                 <th>Due Date</th>
                 <th>Submissions</th>
                 <th>Status</th>
-                <th>Action</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -163,9 +205,17 @@ export default function AssignmentsPage() {
                       </span>
                     </td>
                     <td>
-                      <button className={!isClosed ? styles.reviewBtn : styles.gradesBtn}>
-                        {!isClosed ? 'Review' : 'View Grades'}
-                      </button>
+                      <div className={styles.actionGroup}>
+                        <button className={!isClosed ? styles.reviewBtn : styles.gradesBtn}>
+                          {!isClosed ? 'Review' : 'View Grades'}
+                        </button>
+                        <button className={styles.editBtn} onClick={() => openEditModal(a)}>
+                          <Edit2 size={14} />
+                        </button>
+                        <button className={styles.deleteBtn} onClick={() => handleDelete(a.id)}>
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -179,8 +229,8 @@ export default function AssignmentsPage() {
         <div className="erp-modal-overlay">
           <div className="erp-modal">
             <div className={styles.modalHeader}>
-              <h2>Create New Assignment</h2>
-              <p>Post a new task for your students</p>
+              <h2>{editItem ? 'Edit Assignment' : 'Create New Assignment'}</h2>
+              <p>{editItem ? 'Update the details of this task' : 'Post a new task for your students'}</p>
             </div>
             <form onSubmit={handleSubmit} className="erp-form">
               <div className="erp-form-group">
@@ -232,10 +282,10 @@ export default function AssignmentsPage() {
                 />
               </div>
 
-              <div className="erp-form-actions">
-                <button type="button" className="erp-btn-cancel" onClick={() => setIsModalOpen(false)}>Cancel</button>
+              <div className={styles.modalFooter}>
+                <button type="button" className="erp-btn-cancel" onClick={() => { setIsModalOpen(false); setEditItem(null); }}>Cancel</button>
                 <button type="submit" className="erp-btn-submit" disabled={isSubmitting}>
-                  {isSubmitting ? <Loader2 className="spin" size={16} /> : 'Post Assignment'}
+                  {isSubmitting ? <Loader2 className="spin" size={16} /> : (editItem ? 'Save Changes' : 'Post Assignment')}
                 </button>
               </div>
             </form>

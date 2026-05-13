@@ -125,3 +125,66 @@
   border: 1px solid #d1d5db;
 }
 .gradesBtn:hover { background: #f9fafb; }
+
+.actionGroup {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.editBtn, .deleteBtn {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.editBtn {
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.editBtn:hover {
+  background-color: #f1f5f9;
+  color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.deleteBtn {
+  color: #ef4444;
+  border: 1px solid #fee2e2;
+}
+
+.deleteBtn:hover {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.modalHeader {
+  margin-bottom: 2rem;
+}
+
+.modalHeader h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.modalHeader p {
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #f1f5f9;
+}
