@@ -7,7 +7,6 @@ interface CourseCardProps {
   code: string;
   section: string;
   students: number;
-  credits: number;
   icon?: React.ReactNode;
 }
 
@@ -16,7 +15,6 @@ export default function CourseCard({
   code,
   section,
   students,
-  credits,
   icon
 }: CourseCardProps) {
   return (
@@ -35,10 +33,6 @@ export default function CourseCard({
         <div className={styles.stat}>
           <Users size={16} />
           <span>{students} Students</span>
-        </div>
-        <div className={styles.stat}>
-          <GraduationCap size={16} />
-          <span>{credits} Credits</span>
         </div>
       </div>
 

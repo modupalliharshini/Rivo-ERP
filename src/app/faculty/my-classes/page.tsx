@@ -63,7 +63,6 @@ export default function MyClassesPage() {
             code: grade,
             section: 'Standard',
             students: count || 0,
-            credits: 4.0, // Mocked for now
             icon: <Icon size={24} />
           };
         }));
