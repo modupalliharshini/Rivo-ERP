@@ -142,6 +142,61 @@
   color: #111827;
 }
 
+.dues {
+  color: #fecaca;
+}
+
+.payBtn {
+  margin-top: 1.5rem;
+  background: white;
+  color: #3b82f6;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 1rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.structureInfo {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.structureInfo h3 {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.structureGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.structureItem {
+  font-size: 0.875rem;
+  color: #475569;
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+  background: #f8fafc;
+  border-radius: 6px;
+}
+
 @media (max-width: 1024px) {
   .contentLayout {
     grid-template-columns: 1fr;

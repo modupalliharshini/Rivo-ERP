@@ -132,9 +132,83 @@
   color: var(--text-secondary);
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.tabBtn {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.2s;
+}
+
+.activeTab {
+  background: white;
+  border-color: #3b82f6;
+  color: #3b82f6;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.structureHeader {
+  margin-bottom: 2rem;
+}
+
+.structureHint {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-top: -1rem;
+}
+
+.scrollContainer {
+  overflow-x: auto;
+  margin: 0 -1rem;
+  padding: 0 1rem;
+}
+
+.gradeCell {
+  white-space: nowrap;
+  font-weight: 700 !important;
+  color: #3b82f6 !important;
+}
+
+.structureInput {
+  width: 90px;
+  padding: 0.4rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+  text-align: center;
+}
+
+.structureInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.1);
+}
+
+.totalCell {
+  font-weight: 800 !important;
+  color: #3b82f6 !important;
+  white-space: nowrap;
+}
+
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 1024px) {
+  .headerActions { flex-wrap: wrap; }
 }
 
 @media (max-width: 768px) {
