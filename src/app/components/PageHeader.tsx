@@ -18,8 +18,8 @@ export default function PageHeader({
   titleHighlight,
   actionElement,
 }: PageHeaderProps) {
-  const [userName, setUserName] = useState('Admin');
-  const [initials, setInitials] = useState('AD');
+  const [userName, setUserName] = useState('');
+  const [initials, setInitials] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -94,10 +94,10 @@ export default function PageHeader({
           >
             <div className={styles.userProfile}>
               <span className={styles.welcomeText}>Welcome back,</span>
-              <span className={styles.userName}>{userName}</span>
+              <span className={styles.userName}>{userName || '...'}</span>
             </div>
             <div className={styles.avatarWrapper}>
-              <div className={styles.avatar}>{initials}</div>
+              <div className={styles.avatar}>{initials || '??'}</div>
               <ChevronDown className={`${styles.chevron} ${isDropdownOpen ? styles.chevronOpen : ''}`} size={16} />
             </div>
           </button>

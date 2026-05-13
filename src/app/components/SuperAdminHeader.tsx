@@ -21,8 +21,8 @@ interface SuperAdminHeaderProps {
 export default function SuperAdminHeader({ title, highlight, actionElement }: SuperAdminHeaderProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [displayName, setDisplayName] = useState('SA Admin');
-  const [initials, setInitials] = useState('SA');
+  const [displayName, setDisplayName] = useState('');
+  const [initials, setInitials] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -81,10 +81,10 @@ export default function SuperAdminHeader({ title, highlight, actionElement }: Su
         >
           <div className={SuperAdminHeaderStyles.profileText}>
             <span className={SuperAdminHeaderStyles.greeting}>Welcome back,</span>
-            <span className={SuperAdminHeaderStyles.userName}>{displayName}</span>
+            <span className={SuperAdminHeaderStyles.userName}>{displayName || '...'}</span>
           </div>
           <div className={SuperAdminHeaderStyles.avatarWrapper}>
-            <div className={SuperAdminHeaderStyles.avatar}>{initials}</div>
+            <div className={SuperAdminHeaderStyles.avatar}>{initials || '??'}</div>
             <ChevronDown className={`${SuperAdminHeaderStyles.chevron} ${isDropdownOpen ? SuperAdminHeaderStyles.chevronOpen : ''}`} size={16} />
           </div>
         </button>
