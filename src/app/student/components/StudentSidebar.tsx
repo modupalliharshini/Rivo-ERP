@@ -29,7 +29,6 @@ const STUDENT_MENU_ITEMS = [
   { name: 'Assignments', path: '/student/assignments', icon: ClipboardList },
   { name: 'Attendance', path: '/student/attendance', icon: CalendarCheck },
   { name: 'Exam Section', path: '/student/exams', icon: FileCheck },
-  { name: 'My CGPA', path: '/student/cgpa', icon: GraduationCap },
   { name: 'Time Tables', path: '/student/timetable', icon: Clock },
   { name: 'Fee Payments', path: '/student/fees', icon: Banknote },
   { name: 'Library', path: '/student/library', icon: Book },
