@@ -160,10 +160,13 @@ export default function CoursesPage() {
 
           return (
             <div key={course.id} className={`${styles.courseCard} card-shadow`}>
-              <div className={styles.iconContainer}>
-                <div className={`${styles.iconWrapper} ${colorClass}`}>
-                  <Icon size={24} />
+              <div className={styles.headerRow}>
+                <div className={styles.iconContainer}>
+                  <div className={`${styles.iconWrapper} ${colorClass}`}>
+                    <Icon size={24} />
+                  </div>
                 </div>
+                <span className={styles.codeBadge}>{course.course_code}</span>
               </div>
               <h3 className={styles.courseTitle}>{subject}</h3>
               <p className={styles.courseSub}>Core Module | {course.grade}</p>

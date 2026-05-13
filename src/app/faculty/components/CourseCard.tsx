@@ -26,8 +26,11 @@ export default function CourseCard({
           {icon}
         </div>
         <div className={styles.info}>
-          <h3 className={styles.title}>{title}</h3>
-          <p className={styles.subtitle}>{code} | {section}</p>
+          <div className={styles.titleRow}>
+            <h3 className={styles.title}>{title}</h3>
+            <span className={styles.codeBadge}>{code}</span>
+          </div>
+          <p className={styles.subtitle}>{section}</p>
         </div>
       </div>
       

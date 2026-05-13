@@ -50,10 +50,10 @@ export default function MyClassesPage() {
             .eq('role', 'student')
             .eq('grade', grade);
 
-          // Get syllabus from courses table
+          // Get course details from courses table
           const { data: courseData } = await supabase
             .from('courses')
-            .select('syllabus_url')
+            .select('syllabus_url, course_code')
             .eq('grade', grade)
             .eq('title', subject)
             .single();
@@ -68,7 +68,7 @@ export default function MyClassesPage() {
 
           return {
             title: subject,
-            code: grade,
+            code: courseData?.course_code || grade,
             section: courseData?.syllabus_url ? 'Syllabus Available' : 'View Syllabus',
             students: count || 0,
             icon: <Icon size={24} />,

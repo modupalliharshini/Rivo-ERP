@@ -76,6 +76,23 @@
   border-radius: var(--radius-md);
 }
 
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.codeBadge {
+  background-color: #eff6ff;
+  color: #3b82f6;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 1px solid #dbeafe;
+}
+
 .iconWrapperBlue { background-color: #eff6ff; color: #3b82f6; } /* Tail blue-50 and blue-500 */
 .iconWrapperGreen { background-color: #ecfdf5; color: #10b981; } /* Tail emerald-50 and 500 */
 .iconWrapperRed { background-color: #fef2f2; color: #ef4444; } /* Tail red-50 and 500 */
