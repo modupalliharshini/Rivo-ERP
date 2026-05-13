@@ -75,16 +75,35 @@ export default function FacultyDashboard() {
         totalStudents = count || 0;
       }
 
-      // 4. Pending Grades (exams with Grading status in faculty's grades)
-      const { data: pendingExams } = await supabase
+      // 4. Advanced Pending Grades Calculation
+      // Count exactly how many student results are missing for exams currently in 'Grading' status
+      const { data: activeExams } = await supabase
         .from('exams')
-        .select('id')
+        .select('id, grade')
         .eq('status', 'Grading')
         .in('grade', distinctGrades);
       
-      const pendingExamsCount = pendingExams?.length || 0;
+      let totalPendingResults = 0;
+      if (activeExams && activeExams.length > 0) {
+        for (const exam of activeExams) {
+          // Get total students in this grade
+          const { count: studentCount } = await supabase
+            .from('profiles')
+            .select('*', { count: 'exact', head: true })
+            .eq('role', 'student')
+            .eq('grade', exam.grade);
+          
+          // Get results already entered for this exam
+          const { count: resultsCount } = await supabase
+            .from('results')
+            .select('*', { count: 'exact', head: true })
+            .eq('exam_id', exam.id);
+          
+          totalPendingResults += ((studentCount || 0) - (resultsCount || 0));
+        }
+      }
 
-      // 5. Avg Attendance
+      // 5. Avg Attendance (Lifetime average for this faculty's sessions)
       const { data: attRecords } = await supabase
         .from('attendance')
         .select('status')
@@ -96,7 +115,7 @@ export default function FacultyDashboard() {
         avgAtt = Math.round((presentCount / attRecords.length) * 100);
       }
 
-      // 6. Recent Submissions (mocked from results since there's no assignments table yet)
+      // 6. Recent Submissions (Latest entries from results table)
       const { data: recentResults } = await supabase
         .from('results')
         .select('*, profiles(first_name, last_name, email)')
@@ -107,7 +126,7 @@ export default function FacultyDashboard() {
         setSubmissions(recentResults.map(r => ({
           id: r.id,
           student: `${r.profiles.first_name} ${r.profiles.last_name}`,
-          assignment: r.remarks || 'Result Uploaded',
+          assignment: r.remarks || 'Marks Uploaded',
           status: 'New',
           time: new Date(r.created_at).toLocaleDateString(),
           initial: r.profiles.first_name[0] + r.profiles.last_name[0],
@@ -115,7 +134,7 @@ export default function FacultyDashboard() {
         })));
       }
 
-      // Update Stats
+      // Update Stats with more dynamic subtexts
       setStats([
         {
           title: 'Classes Today',
@@ -133,9 +152,9 @@ export default function FacultyDashboard() {
         },
         {
           title: 'Pending Grades',
-          value: pendingExamsCount.toString(),
-          subtext: pendingExamsCount > 0 ? 'Needs review' : 'All caught up',
-          subtextColor: pendingExamsCount > 0 ? 'warning' : 'success',
+          value: totalPendingResults.toString(),
+          subtext: totalPendingResults > 0 ? `${activeExams?.length} exams in progress` : 'All caught up',
+          subtextColor: totalPendingResults > 0 ? 'warning' : 'success',
           icon: <FileCheck size={20} />
         },
         {
