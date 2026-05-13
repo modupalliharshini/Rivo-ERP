@@ -5,7 +5,7 @@ import PageHeader from '../../components/PageHeader';
 import styles from './page.module.css';
 import Link from 'next/link';
 import { createClient } from '../../../utils/supabase/client';
-import { Loader2, Send, CheckCircle, Clock, AlertTriangle, FileText } from 'lucide-react';
+import { Loader2, Send, CheckCircle, Clock, AlertTriangle, FileText, AlertCircle } from 'lucide-react';
 
 export default function AssignmentsPage() {
   const supabase = createClient();
@@ -127,11 +127,28 @@ export default function AssignmentsPage() {
             return (
               <div key={a.id} className={`${styles.card} ${styles[`card${urgency.theme}`]}`}>
                 <div className={styles.info}>
-                  <span className={`${styles.dueText} ${styles[`text${urgency.theme}`]}`}>
-                    {urgency.label}
-                  </span>
+                  <div className={styles.cardHeader}>
+                    <span className={`${styles.dueText} ${styles[`text${urgency.theme}`]}`}>
+                      {urgency.label}
+                    </span>
+                    {a.description && (
+                      <button 
+                        className={styles.infoIcon}
+                        onClick={() => { setSelectedAssignment(a); setIsSubmitModalOpen(true); }}
+                        title="View Instructions"
+                      >
+                        <AlertCircle size={16} />
+                      </button>
+                    )}
+                  </div>
                   <h3 className={styles.title}>{a.title}</h3>
                   <p className={styles.details}>{a.subject} • {a.profiles?.first_name} {a.profiles?.last_name}</p>
+                  
+                  {a.description && (
+                    <div className={styles.descriptionPreview}>
+                      {a.description}
+                    </div>
+                  )}
                 </div>
                 {filter === 'Active' ? (
                   <button 
@@ -169,8 +186,18 @@ export default function AssignmentsPage() {
           <div className="erp-modal">
             <div className={styles.modalHeader}>
               <h2>Submit Assignment</h2>
-              <p>{selectedAssignment?.title}</p>
+              <p className={styles.modalSubject}>{selectedAssignment?.subject} • {selectedAssignment?.profiles?.first_name} {selectedAssignment?.profiles?.last_name}</p>
             </div>
+            
+            {selectedAssignment?.description && (
+              <div className={styles.modalInstructions}>
+                <h3>Instructions & Description</h3>
+                <div className={styles.instructionContent}>
+                  {selectedAssignment.description}
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="erp-form">
               <div className="erp-form-group">
                 <label>Submission Link (Google Drive / GitHub / etc.)</label>
