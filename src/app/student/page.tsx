@@ -47,25 +47,39 @@ export default function StudentDashboard() {
       .select('subject_marks')
       .eq('student_id', user.id);
     
-    let totalMarks = 0;
+    let totalMarksSum = 0;
     let subjectsCount = 0;
     resultsData?.forEach(r => {
-      const marksObj = r.subject_marks as Record<string, number>;
+      const marksObj = r.subject_marks as Record<string, any>;
       Object.values(marksObj).forEach(m => {
-        totalMarks += m;
-        subjectsCount++;
+        const val = parseFloat(m);
+        if (!isNaN(val)) {
+          totalMarksSum += val;
+          subjectsCount++;
+        }
       });
     });
-    const avgGrade = subjectsCount > 0 ? (totalMarks / subjectsCount).toFixed(1) : 'N/A';
+    const avgGrade = subjectsCount > 0 ? (totalMarksSum / subjectsCount).toFixed(1) : 'N/A';
 
     // 4. Fetch Pending Assignments
-    const { data: submissions } = await supabase
-      .from('assignment_submissions')
+    // We count assignments for the student's grade that aren't yet submitted/graded
+    const { data: allAssignments } = await supabase
+      .from('assignments')
       .select('id')
-      .eq('student_id', user.id)
-      .eq('status', 'pending');
+      .eq('grade', profile.grade);
     
-    const pendingCount = submissions?.length || 0;
+    const { data: studentSubmissions } = await supabase
+      .from('assignment_submissions')
+      .select('assignment_id, status')
+      .eq('student_id', user.id);
+    
+    const submittedIds = new Set(
+      studentSubmissions
+        ?.filter(s => s.status === 'submitted' || s.status === 'graded')
+        .map(s => s.assignment_id) || []
+    );
+
+    const pendingCount = (allAssignments?.filter(a => !submittedIds.has(a.id)).length) || 0;
 
     // 5. Fetch Today's Schedule
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
