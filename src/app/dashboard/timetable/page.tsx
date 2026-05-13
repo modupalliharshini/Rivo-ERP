@@ -90,23 +90,23 @@ export default function TimeTablePage() {
     const { data: profile } = await supabase.from('profiles').select('institution_id').eq('id', user?.id).single();
 
     try {
+      const submissionData = {
+        ...formData,
+        grade: activeGrade,
+        faculty_id: formData.faculty_id === '' ? null : formData.faculty_id,
+        institution_id: profile?.institution_id
+      };
+
       if (editItem) {
         const { error } = await supabase
           .from('timetables')
-          .update({
-            ...formData,
-            grade: activeGrade
-          })
+          .update(submissionData)
           .eq('id', editItem.id);
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from('timetables')
-          .insert({
-            ...formData,
-            grade: activeGrade,
-            institution_id: profile?.institution_id
-          });
+          .insert(submissionData);
         if (error) throw error;
       }
       setIsModalOpen(false);
@@ -121,6 +121,7 @@ export default function TimeTablePage() {
       });
       fetchData();
     } catch (err) {
+      console.error('Error saving timetable:', err);
       alert('Failed to save timetable entry');
     } finally {
       setIsSubmitting(false);
@@ -134,12 +135,21 @@ export default function TimeTablePage() {
     else fetchData();
   };
 
+  const formatTimeForInput = (timeStr: string) => {
+    if (!timeStr) return '';
+    // Handle HH:MM:SS or H:MM:SS
+    const parts = timeStr.split(':');
+    const hours = parts[0].padStart(2, '0');
+    const minutes = parts[1].padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+
   const openEditModal = (item: any) => {
     setEditItem(item);
     setFormData({
       day_of_week: item.day_of_week,
-      start_time: item.start_time.substring(0, 5),
-      end_time: item.end_time.substring(0, 5),
+      start_time: formatTimeForInput(item.start_time),
+      end_time: formatTimeForInput(item.end_time),
       subject: item.subject,
       faculty_id: item.faculty_id || '',
       room: item.room || ''
