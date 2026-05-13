@@ -87,41 +87,31 @@
   gap: 0.75rem;
 }
 
-.primaryBtn {
+.downloadBtn {
   flex: 1;
+  width: 100%;
   background-color: #3b82f6;
   color: white;
   border: none;
-  padding: 0.625rem;
-  border-radius: 6px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  transition: background 0.2s;
-}
-
-.primaryBtn:hover {
-  background-color: #2563eb;
-}
-
-.secondaryBtn {
-  flex: 1;
-  background-color: white;
-  color: #374151;
-  border: 1px solid #d1d5db;
-  padding: 0.625rem;
-  border-radius: 6px;
-  font-size: 0.8125rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.secondaryBtn:hover {
-  background-color: #f9fafb;
-  border-color: #9ca3af;
+.downloadBtn:hover:not(:disabled) {
+  background-color: #2563eb;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+.downloadBtn:disabled {
+  background-color: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+  border: 1px solid #e5e7eb;
 }

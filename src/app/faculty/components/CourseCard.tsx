@@ -42,15 +42,12 @@ export default function CourseCard({
       </div>
 
       <div className={styles.actions}>
-        <button className={styles.primaryBtn}>
-          View Roster <ArrowRight size={14} />
-        </button>
         <button 
-          className={styles.secondaryBtn}
+          className={styles.downloadBtn}
           onClick={() => syllabusUrl && window.open(syllabusUrl, '_blank')}
           disabled={!syllabusUrl}
         >
-          {syllabusUrl ? 'Download Syllabus' : 'Syllabus'}
+          {syllabusUrl ? 'Download Syllabus' : 'Syllabus Not Available'}
         </button>
       </div>
     </div>
