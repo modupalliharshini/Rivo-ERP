@@ -5,11 +5,14 @@ import styles from './page.module.css';
 import PageHeader from '../../components/PageHeader';
 import { Search, User, Users, Loader2 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
+import StudentProfileModal from '../components/StudentProfileModal';
 
 export default function MyStudentsPage() {
   const [students, setStudents] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -107,7 +110,13 @@ export default function MyStudentsPage() {
                   <td>{s.grade}</td>
                   <td>{s.email}</td>
                   <td>
-                    <button className={styles.viewBtn}>
+                    <button 
+                      className={styles.viewBtn}
+                      onClick={() => {
+                        setSelectedStudentId(s.id);
+                        setIsProfileOpen(true);
+                      }}
+                    >
                       <User size={14} />
                       View Profile
                     </button>
@@ -123,6 +132,12 @@ export default function MyStudentsPage() {
           </div>
         )}
       </div>
+
+      <StudentProfileModal 
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+        studentId={selectedStudentId}
+      />
     </main>
   );
 }
