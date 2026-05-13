@@ -26,7 +26,6 @@ const FACULTY_MENU_ITEMS = [
   { name: 'My Classes', path: '/faculty/my-classes', icon: BookOpen },
   { name: 'Attendance Register', path: '/faculty/attendance', icon: CalendarCheck },
   { name: 'Assignments', path: '/faculty/assignments', icon: ClipboardList },
-  { name: 'Grades & Exams', path: '/faculty/grades', icon: FileText },
   { name: 'My Students', path: '/faculty/students', icon: Users },
   { name: 'Counselling Diary', path: '/faculty/counselling', icon: Notebook },
   { name: 'Time Tables', path: '/faculty/timetable', icon: CalendarDays },
