@@ -88,10 +88,43 @@
   font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   font-family: inherit;
   transition: all 0.2s;
 }
 .exportBtn:hover { background: #f0fdf4; }
+
+.loaderContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 0;
+  gap: 1rem;
+  color: #64748b;
+}
+
+.saveBtn {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.saveBtn:hover { color: #2563eb; }
+
+.saveBtn.saving {
+  color: #10b981;
+  cursor: default;
+}
 
 .table {
   width: 100%;
@@ -142,15 +175,3 @@
   font-size: 0.8125rem;
   font-weight: 700;
 }
-
-.saveBtn {
-  background: none;
-  border: none;
-  color: #3b82f6;
-  font-weight: 600;
-  font-size: 0.9375rem;
-  cursor: pointer;
-  font-family: inherit;
-  transition: color 0.2s;
-}
-.saveBtn:hover { color: #2563eb; }
